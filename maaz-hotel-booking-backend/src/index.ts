@@ -24,7 +24,6 @@ import rateLimit from "express-rate-limit";
 
 // Environment Variables Validation
 const requiredEnvVars = [
-  "MONGODB_CONNECTION_STRING",
   "JWT_SECRET_KEY",
   "CLOUDINARY_CLOUD_NAME",
   "CLOUDINARY_API_KEY",
@@ -54,8 +53,6 @@ cloudinary.config({
 });
 
 console.log("☁️  Cloudinary configured successfully");
-
-// Removed MongoDB Connection Logic
 
 const app = express();
 
