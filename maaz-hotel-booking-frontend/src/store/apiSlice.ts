@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { getApiBaseUrl } from '../lib/api-client';
-import Cookies from 'js-cookie';
+import Cookies from '../../node_modules/@types/js-cookie';
 import {
   HotelSearchResponse,
   HotelType,
@@ -88,7 +88,7 @@ export const apiSlice = createApi({
             const name = [firstName, lastName].filter(Boolean).join(' ') || email;
             if (name) localStorage.setItem('user_name', name);
           }
-        } catch {}
+        } catch { }
       },
     }),
     signIn: builder.mutation<any, SignInFormData>({
@@ -109,7 +109,7 @@ export const apiSlice = createApi({
             const name = [firstName, lastName].filter(Boolean).join(' ') || email;
             if (name) localStorage.setItem('user_name', name);
           }
-        } catch {}
+        } catch { }
       },
     }),
     signOut: builder.mutation<any, void>({
@@ -126,7 +126,7 @@ export const apiSlice = createApi({
           localStorage.removeItem('user_email');
           localStorage.removeItem('user_name');
           localStorage.removeItem('user_image');
-        } catch {}
+        } catch { }
       }
     }),
 
@@ -158,7 +158,7 @@ export const apiSlice = createApi({
       query: (id) => `/api/hotels/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Hotel', id }],
     }),
-    
+
     // My Hotels
     getMyHotels: builder.query<HotelType[], void>({
       query: () => '/api/my-hotels',
@@ -186,8 +186,8 @@ export const apiSlice = createApi({
         };
       },
       invalidatesTags: (_result, _error, arg) => [
-        { type: 'MyHotel', id: arg.get('hotelId') as string }, 
-        'MyHotel', 
+        { type: 'MyHotel', id: arg.get('hotelId') as string },
+        'MyHotel',
         'Hotel'
       ],
     }),
@@ -305,7 +305,7 @@ export const apiSlice = createApi({
       query: () => '/api/reviews',
       providesTags: ['Review'],
     }),
-    
+
     // Health
     getHealth: builder.query<any, void>({
       query: () => '/api/health',
