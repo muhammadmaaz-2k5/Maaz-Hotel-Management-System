@@ -1,15 +1,30 @@
 {
-    "buildCommand": "npm run build",
-    "outputDirectory": "dist",
-    "framework": "vite",
-    "rewrites": [
+    "version": 2,
+    "builds": [
         {
-            "source": "/(.*)",
-            "destination": "/index.html"
+            "src": "src/index.ts",
+            "use": "@vercel/node"
         }
     ],
+    "routes": [
+        { "src": "/(.*)", "dest": "src/index.ts" }
+    ],
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
     "env": {
-        "VITE_API_BASE_URL": "https://hotel-booking-backend.arnobmahmud.com"
+        "MONGODB_CONNECTION_STRING": "@mongodb_connection_string",
+        "JWT_SECRET_KEY": "@jwt_secret_key",
+        "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
+        "CLOUDINARY_API_KEY": "@cloudinary_api_key",
+        "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
+        "STRIPE_API_KEY": "@stripe_api_key",
+        "FRONTEND_URL": "https://hotel-mern-booking.vercel.app",
+        "BACKEND_URL": "https://hotel-booking-backend.arnobmahmud.com",
+        "GOOGLE_ID": "@google_client_id",
+        "GOOGLE_SECRET": "@google_client_secret",
+        "NODE_ENV": "production",
+        "PORT": "5001",
+        "AI_ASSIST_ENABLED": "false"
     },
     "headers": [
         {
