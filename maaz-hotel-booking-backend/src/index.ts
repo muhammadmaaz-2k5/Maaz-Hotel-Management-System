@@ -212,53 +212,59 @@ const PORT = process.env.PORT || 5001;
 const backendBaseUrl =
   process.env.BACKEND_URL?.replace(/\/$/, "") || `http://localhost:${PORT}`;
 
-const server = app.listen(PORT, () => {
-  console.log("🚀 ============================================");
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`🌐 Local: http://localhost:${PORT}`);
-  console.log(`🔗 Public: ${backendBaseUrl}`);
-  console.log(`📚 API Docs: ${backendBaseUrl}/api-docs`);
-  console.log(`💚 Health Check: ${backendBaseUrl}/api/health`);
-  console.log("🚀 ============================================");
-});
+// Only start the server when running standalone (not in Vercel serverless).
+// In serverless mode, Vercel's @vercel/node wraps the exported `app` as a function.
+const isVercel = Boolean(process.env.VERCEL);
 
 export default app;
 
-// Graceful Shutdown Handler
-const gracefulShutdown = (signal: string) => {
-  console.log(`\n⚠️  ${signal} received. Starting graceful shutdown...`);
-
-  server.close(async () => {
-    console.log("🔒 HTTP server closed");
-
-    try {
-      console.log("✅ Graceful shutdown completed");
-      process.exit(0);
-    } catch (error) {
-      console.error("❌ Error during shutdown:", error);
-      process.exit(1);
-    }
+if (!isVercel) {
+  const server = app.listen(PORT, () => {
+    console.log("🚀 ============================================");
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`🌐 Local: http://localhost:${PORT}`);
+    console.log(`🔗 Public: ${backendBaseUrl}`);
+    console.log(`📚 API Docs: ${backendBaseUrl}/api-docs`);
+    console.log(`💚 Health Check: ${backendBaseUrl}/api/health`);
+    console.log("🚀 ============================================");
   });
 
-  // Force shutdown after 30 seconds
-  setTimeout(() => {
-    console.error("⚠️  Forced shutdown after timeout");
-    process.exit(1);
-  }, 30000);
-};
+  // Graceful Shutdown Handler
+  const gracefulShutdown = (signal: string) => {
+    console.log(`\n⚠️  ${signal} received.Starting graceful shutdown...`);
 
-// Handle shutdown signals
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+    server.close(async () => {
+      console.log("🔒 HTTP server closed");
 
-// Handle uncaught exceptions
-process.on("uncaughtException", (error) => {
-  console.error("❌ Uncaught Exception:", error);
-  gracefulShutdown("UNCAUGHT_EXCEPTION");
-});
+      try {
+        console.log("✅ Graceful shutdown completed");
+        process.exit(0);
+      } catch (error) {
+        console.error("❌ Error during shutdown:", error);
+        process.exit(1);
+      }
+    });
 
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
-  gracefulShutdown("UNHANDLED_REJECTION");
-});
+    // Force shutdown after 30 seconds
+    setTimeout(() => {
+      console.error("⚠️  Forced shutdown after timeout");
+      process.exit(1);
+    }, 30000);
+  };
+
+  // Handle shutdown signals
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+  // Handle uncaught exceptions
+  process.on("uncaughtException", (error) => {
+    console.error("❌ Uncaught Exception:", error);
+    gracefulShutdown("UNCAUGHT_EXCEPTION");
+  });
+
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+    gracefulShutdown("UNHANDLED_REJECTION");
+  });
+}
