@@ -41,6 +41,7 @@
 | REQ-0050 | Auth/TLS harden + SECURITY HTTPS note | done [C1] |
 | REQ-0051 | Full-field Mongoose seed | done [C1] |
 | REQ-0052 | Admin role PATCH + hotel isActive toggle | done [C1] |
+| REQ-0053 | Backend Vercel build fix & TS scope configuration | done [C1] |
 
 ---
 
@@ -446,10 +447,10 @@
 - **Done Criteria:** [x] scripts/seed.ts full fields
 - **Status:** done [C1]
 
-## REQ-0052 — Admin role + hotel active
+## REQ-0053 — Backend Vercel build fix & TS scope configuration
 
-- **Requirement:** `PATCH /api/users/:id/role` (admin); `PATCH /api/hotels/:id/active` (admin) + `PATCH /api/my-hotels/:id/active` (owner); Admin Users/Hotels UI + invalidateAdminQueries.
-- **Done Criteria:** [x] users/hotels/my-hotels routes · [x] AdminUsers · [x] AdminHotels · [x] api-client
+- **Requirement:** Resolve backend Vercel deployment build failures by installing `@supabase/supabase-js`, scoping root and backend `tsconfig.json` to exclude frontend and e2e tests, and fixing TS type mismatch errors in `analytics.ts`, `business-insights.ts`, and `my-bookings.ts`.
+- **Done Criteria:** [x] package.json deps · [x] tsconfig include/exclude · [x] route type assertions · [x] BE build green
 - **Status:** done [C1]
 
 ---

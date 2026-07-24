@@ -55,12 +55,12 @@ const buildLiveSnapshot = async () => {
 
   // Fetch hotels for destination and type breakdown
   const { data: hotels } = await supabase.from("hotels").select("_id, city, type, total_bookings, total_revenue");
-  const hotelsMap = new Map((hotels || []).map(h => [h._id, h]));
+  const hotelsMap = new Map((hotels || []).map((h: any) => [h._id, h]));
 
   // Destination breakdown (top cities via hotel lookup)
   const destMap = new Map<string, { bookings: number, revenue: number }>();
   for (const b of (allBookings || [])) {
-    const h = hotelsMap.get(b.hotel_id);
+    const h: any = hotelsMap.get(b.hotel_id);
     if (h) {
       const city = h.city || "Unknown";
       const stats = destMap.get(city) || { bookings: 0, revenue: 0 };

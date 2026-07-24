@@ -27,10 +27,10 @@ router.get("/", verifyToken, async (req: Request, res: Response) => {
 
     if (hotelsError) throw hotelsError;
 
-    const hotelsMap = new Map(hotels?.map(h => [h._id, h]));
+    const hotelsMap = new Map(hotels?.map((h: any) => [h._id, h]));
 
     const validResults = userBookings.map(booking => {
-      const hotel = hotelsMap.get(booking.hotel_id);
+      const hotel: any = hotelsMap.get(booking.hotel_id);
       if (!hotel) return null;
       return {
         ...hotel,

@@ -106,5 +106,16 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "noEmitOnError": false /* Disable emitting files if any type checking errors are reported. */
-  }
+  },
+  "include": [
+    "src/**/*",
+    "maaz-hotel-booking-backend/src/**/*",
+    "shared/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "e2e-tests",
+    "maaz-hotel-booking-frontend"
+  ]
 }

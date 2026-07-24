@@ -56,7 +56,7 @@ const getDashboardData = async () => {
 
   const destMap = new Map<string, any>();
   for (const b of (allBookings || [])) {
-    const h = hotelsMap.get(b.hotel_id);
+    const h: any = hotelsMap.get(b.hotel_id);
     if (h) {
       const city = h.city || "Unknown";
       if (!destMap.has(city)) destMap.set(city, { _id: city, count: 0, totalRevenue: 0, avgPrice: h.price_per_night });
@@ -85,7 +85,7 @@ const getDashboardData = async () => {
 
   const hotelPerfMap = new Map<string, any>();
   for (const b of (allBookings || [])) {
-    const h = hotelsMap.get(b.hotel_id);
+    const h: any = hotelsMap.get(b.hotel_id);
     if (h) {
       if (!hotelPerfMap.has(h._id)) {
         hotelPerfMap.set(h._id, {

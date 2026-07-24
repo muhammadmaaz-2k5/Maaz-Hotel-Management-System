@@ -9,7 +9,7 @@
 | **Cycle** | **C1** |
 | **Phase** | Stage 3–4 — Insights denser shipped |
 | **Status** | Insights KPIs/Quality/invalidate/prefetch · redeploy Vercel FE |
-| **Last REQ** | **REQ-0052** |
+| **Last REQ** | **REQ-0053** |
 | **HEAD** | 14f6d07 on origin/main |
 | **Resume token** | `c1-t5-ai-auth-seed` |
 | **CHECKPOINTS** | INT-0001 PENDING (Gate 1) |
