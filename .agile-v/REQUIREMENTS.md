@@ -447,6 +447,12 @@
 - **Done Criteria:** [x] scripts/seed.ts full fields
 - **Status:** done [C1]
 
+## REQ-0052 — Admin role + hotel active
+
+- **Requirement:** `PATCH /api/users/:id/role` (admin); `PATCH /api/hotels/:id/active` (admin) + `PATCH /api/my-hotels/:id/active` (owner); Admin Users/Hotels UI + invalidateAdminQueries.
+- **Done Criteria:** [x] users/hotels/my-hotels routes · [x] AdminUsers · [x] AdminHotels · [x] api-client
+- **Status:** done [C1]
+
 ## REQ-0053 — Backend Vercel build fix & TS scope configuration
 
 - **Requirement:** Resolve backend Vercel deployment build failures by installing `@supabase/supabase-js`, scoping root and backend `tsconfig.json` to exclude frontend and e2e tests, and fixing TS type mismatch errors in `analytics.ts`, `business-insights.ts`, and `my-bookings.ts`.
