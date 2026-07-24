@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "env": {
-    "VITE_API_BASE_URL": "https://hotel-booking-backend.arnobmahmud.com"
+    "VITE_API_BASE_URL": "https://maaz-hotel-management-system.vercel.app"
   },
   "headers": [
     {
