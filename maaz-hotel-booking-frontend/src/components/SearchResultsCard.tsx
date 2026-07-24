@@ -45,7 +45,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
         {/* Image Section */}
         <div className="relative overflow-hidden h-64 xl:h-[500px]">
           <SafeImage
-            src={hotel.imageUrls[0]}
+            src={(hotel as any).imageUrls?.[0] || (hotel as any).image_urls?.[0] || ""}
             alt={hotel.name}
             fill
             className="object-cover object-center transition-transform duration-500 group-hover:scale-105"

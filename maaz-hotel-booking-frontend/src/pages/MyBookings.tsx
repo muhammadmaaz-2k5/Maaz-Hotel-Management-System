@@ -251,7 +251,7 @@ const MyBookings = () => {
               <div className="flex items-start gap-6">
                 <div className="relative">
                   <SafeImage
-                    src={hotel.imageUrls[0]}
+                    src={(hotel as any).imageUrls?.[0] || (hotel as any).image_urls?.[0] || ""}
                     alt={hotel.name}
                     width={96}
                     height={96}

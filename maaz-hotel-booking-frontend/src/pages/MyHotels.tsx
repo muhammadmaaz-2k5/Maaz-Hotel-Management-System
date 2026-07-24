@@ -279,7 +279,7 @@ const MyHotels = () => {
             {/* Hotel Image */}
             <div className="relative h-48 overflow-hidden">
               <SafeImage
-                src={hotel.imageUrls[0]}
+                src={(hotel as any).imageUrls?.[0] || (hotel as any).image_urls?.[0] || ""}
                 alt={hotel.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"

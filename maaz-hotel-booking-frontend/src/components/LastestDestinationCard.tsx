@@ -9,6 +9,14 @@ type Props = {
 };
 
 const LatestDestinationCard = ({ hotel }: Props) => {
+  // Normalize snake_case (Supabase) and camelCase (legacy) field names
+  const h = hotel as any;
+  const imageUrls: string[] = h.imageUrls ?? h.image_urls ?? [];
+  const starRating: number = h.starRating ?? h.star_rating ?? 0;
+  const pricePerNight: number = h.pricePerNight ?? h.price_per_night ?? 0;
+  const adultCount: number = h.adultCount ?? h.adult_count ?? 0;
+  const childCount: number = h.childCount ?? h.child_count ?? 0;
+
   return (
     <Link
       to={`/detail/${hotel._id}`}
@@ -17,7 +25,7 @@ const LatestDestinationCard = ({ hotel }: Props) => {
     >
       <div className="w-full h-full relative">
         <SafeImage
-          src={hotel.imageUrls[0]}
+          src={imageUrls[0] || ""}
           alt={hotel.name}
           fill
           className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
@@ -31,7 +39,7 @@ const LatestDestinationCard = ({ hotel }: Props) => {
           <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
             <Star className="w-4 h-4 text-yellow-500 fill-current" />
             <span className="text-sm font-medium text-gray-700">
-              {hotel.starRating}
+              {starRating}
             </span>
           </div>
         </div>
@@ -39,7 +47,7 @@ const LatestDestinationCard = ({ hotel }: Props) => {
         {/* Price Badge */}
         <div className="absolute top-4 left-4">
           <div className="bg-primary-action text-white rounded-full px-3 py-1">
-            <span className="text-sm font-medium">£{hotel.pricePerNight}</span>
+            <span className="text-sm font-medium">£{pricePerNight}</span>
           </div>
         </div>
       </div>
@@ -87,12 +95,12 @@ const LatestDestinationCard = ({ hotel }: Props) => {
               <div className="flex items-center space-x-3 text-white/80">
                 <div className="flex items-center space-x-1">
                   <Users className="w-3 h-3" />
-                  <span className="text-xs">{hotel.adultCount} adults</span>
+                  <span className="text-xs">{adultCount} adults</span>
                 </div>
-                {hotel.childCount > 0 && (
+                {childCount > 0 && (
                   <div className="flex items-center space-x-1">
                     <Users className="w-3 h-3" />
-                    <span className="text-xs">{hotel.childCount} children</span>
+                    <span className="text-xs">{childCount} children</span>
                   </div>
                 )}
               </div>

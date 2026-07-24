@@ -140,7 +140,7 @@ const Detail = () => {
 
         {/* Hotel Images */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          {hotel.imageUrls.map((image: string, i: number) => (
+          {((hotel as any).imageUrls || (hotel as any).image_urls || []).map((image: string, i: number) => (
             <div key={i} className="h-[300px] relative">
               <SafeImage
                 src={image}

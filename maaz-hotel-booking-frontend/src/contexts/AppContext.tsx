@@ -7,6 +7,8 @@ import type { ToastPayload } from "../lib/toast-messages";
 
 const STRIPE_PUB_KEY = import.meta.env.VITE_STRIPE_PUB_KEY || "";
 
+const stripePromise = STRIPE_PUB_KEY ? loadStripe(STRIPE_PUB_KEY) : Promise.resolve(null);
+
 type ToastMessage = ToastPayload;
 
 export type AppContext = {
@@ -23,7 +25,6 @@ export const AppContext = React.createContext<AppContext | undefined>(
   undefined
 );
 
-const stripePromise = loadStripe(STRIPE_PUB_KEY);
 
 export const AppContextProvider = ({
   children,
