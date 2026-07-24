@@ -1,49 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "none",
-  "env": {
-    "JWT_SECRET_KEY": "@jwt_secret_key",
-    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
-    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
-    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
-    "STRIPE_API_KEY": "@stripe_api_key",
-    "FRONTEND_URL": "https://hotel-mern-booking.vercel.app",
-    "BACKEND_URL": "https://hotel-booking-backend.arnobmahmud.com",
-    "GOOGLE_ID": "@google_client_id",
-    "GOOGLE_SECRET": "@google_client_secret",
-    "NODE_ENV": "production",
-    "PORT": "5001",
-    "AI_ASSIST_ENABLED": "false"
-  },
-  "headers": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), geolocation=()"
-        }
-      ]
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/index.ts"
     }
   ]
 }
