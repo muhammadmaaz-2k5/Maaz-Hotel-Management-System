@@ -28,6 +28,23 @@ export type SearchParams = {
   sortOption?: string;
 };
 
+const snakeToCamel = (str: string): string => {
+  if (str.startsWith('_')) return str;
+  return str.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+};
+
+const camelizeKeys = (obj: any): any => {
+  if (Array.isArray(obj)) return obj.map(camelizeKeys);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc: any, key: string) => {
+      const camelKey = snakeToCamel(key);
+      acc[camelKey] = camelizeKeys(obj[key]);
+      return acc;
+    }, {});
+  }
+  return obj;
+};
+
 const baseQuery = fetchBaseQuery({
   baseUrl: getApiBaseUrl(),
   prepareHeaders: (headers) => {
@@ -39,9 +56,17 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
+const camelizedBaseQuery = async (args: any, api: any, extraOptions: any) => {
+  const result = await baseQuery(args, api, extraOptions);
+  if (result.data && typeof result.data === 'object') {
+    result.data = camelizeKeys(result.data);
+  }
+  return result;
+};
+
 const baseQueryWithRetry = retry(
   async (args, api, extraOptions) => {
-    const result = await baseQuery(args, api, extraOptions);
+    const result = await camelizedBaseQuery(args, api, extraOptions);
     if (result.error && result.error.status === 401) {
       // Handle 401 unauthorized
       Cookies.remove('session_id');
