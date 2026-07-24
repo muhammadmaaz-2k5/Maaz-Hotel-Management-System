@@ -27,5 +27,6 @@
 
 ## Next
 
-1. Redeploy Vercel FE
-2. Gate 1 (INT-0001)
+1. Deploy Vercel BE (Complete)
+2. Redeploy Vercel FE
+3. Gate 1 (INT-0001)
