@@ -110,7 +110,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
 
               <Link
                 to={`/detail/${hotel._id}`}
-                className={cn(theme.typography.h2, "hover:text-primary-600 transition-colors cursor-pointer")}
+                className={cn(theme.typography.h2, "hover:text-primary-action transition-colors cursor-pointer")}
               >
                 {hotel.name}
               </Link>
@@ -161,7 +161,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
                     variant="outline"
                     className="flex items-center space-x-1.5 px-3 py-1.5 text-xs"
                   >
-                    <IconComponent className="w-3 h-3 text-primary-600" />
+                    <IconComponent className="w-3 h-3 text-primary-action" />
                     <span>{facility}</span>
                   </Badge>
                 );
@@ -173,7 +173,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
           <div className="mt-6 pt-4 border-t border-gray-100">
             <Link
               to={`/detail/${hotel._id}`}
-              className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3 px-6 rounded-xl font-medium hover:from-primary-700 hover:to-primary-800 transform hover:scale-105 transition-all duration-200 text-center block"
+              className="w-full bg-primary-action text-white py-3 px-6 rounded-xl font-medium hover:hover:bg-primary-hover transform hover:scale-105 transition-all duration-200 text-center block"
             >
               View Details & Book
             </Link>

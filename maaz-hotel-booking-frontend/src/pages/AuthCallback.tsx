@@ -57,7 +57,7 @@ const AuthCallback = () => {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary-action" />
         <p className="text-sm text-gray-600">Completing sign-in…</p>
       </div>
     </div>

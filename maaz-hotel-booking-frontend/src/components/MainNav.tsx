@@ -62,7 +62,7 @@ const MainNav = () => {
           <Link to="/sign-in">
             <Button
               variant="ghost"
-              className="text-sm font-normal bg-white text-primary-600 hover:bg-primary-50 hover:text-primary-700 border-2 border-white/80"
+              className="text-sm font-normal bg-white text-primary-action hover:bg-primary-50 hover:text-primary-hover border-2 border-white/80"
             >
               Log In
             </Button>

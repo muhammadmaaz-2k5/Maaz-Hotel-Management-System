@@ -8,7 +8,7 @@ import { store } from "../store";
 import { apiSlice } from "../store/apiSlice";
 
 const linkClass =
-  "flex items-center gap-2 w-full py-3 text-sm font-normal text-gray-700 hover:text-primary-600 transition-colors";
+  "flex items-center gap-2 w-full py-3 text-sm font-normal text-gray-700 hover:text-primary-action transition-colors";
 
 /** Mobile nav — API Docs/Status live in UsernameMenu when logged in (not here). */
 const MobileNavLinks = () => {
@@ -46,7 +46,7 @@ const MobileNavLinks = () => {
           <UsernameMenu />
         ) : (
           <Link to="/sign-in" className="w-full">
-            <Button className="w-full font-medium bg-primary-600 hover:bg-primary-700">
+            <Button className="w-full font-medium bg-primary-action hover:bg-primary-hover">
               <LogIn className="h-4 w-4 " />
               Log In
             </Button>

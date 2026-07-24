@@ -38,7 +38,7 @@ const AdminLayout = () => {
               className={({ isActive }) =>
                 `flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-primary-50 text-primary-700"
+                    ? "bg-primary-50 text-primary-hover"
                     : "text-slate-600 hover:bg-slate-100"
                 }`
               }
@@ -51,7 +51,7 @@ const AdminLayout = () => {
         <div className="p-3 border-t border-slate-100">
           <Link
             to="/"
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary-700"
+            className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary-hover"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to site

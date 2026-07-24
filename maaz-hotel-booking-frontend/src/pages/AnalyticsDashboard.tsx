@@ -172,7 +172,7 @@ const AnalyticsDashboard = () => {
       {/* Page header — always visible (Vite shell) */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-stretch gap-3">
-          <div className="flex shrink-0 items-center justify-center rounded-xl bg-primary-100 px-3 text-primary-600">
+          <div className="flex shrink-0 items-center justify-center rounded-xl bg-primary-100 px-3 text-primary-action">
             <BarChart3 className="h-6 w-6" aria-hidden />
           </div>
           <div className="min-w-0 flex flex-col justify-center">

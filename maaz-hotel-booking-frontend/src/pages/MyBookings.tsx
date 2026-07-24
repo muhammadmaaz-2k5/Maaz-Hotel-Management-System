@@ -48,7 +48,7 @@ const MyBookings = () => {
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-full bg-primary-100">
-                <Calendar className="h-8 w-8 text-primary-600" />
+                <Calendar className="h-8 w-8 text-primary-action" />
               </div>
               <div>
                 <CardTitle className="text-lg md:text-2xl font-medium text-gray-700">
@@ -67,20 +67,20 @@ const MyBookings = () => {
             </p>
             <div className="flex flex-col gap-2 text-sm mb-4">
               <div className="flex items-center gap-2">
-                <UserCircle className="h-4 w-4 text-primary-600" />
+                <UserCircle className="h-4 w-4 text-primary-action" />
                 <span className="text-sm font-normal text-gray-700">
                   Test credentials: test@user.com / 12345678
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-primary-600" />
+                <CreditCard className="h-4 w-4 text-primary-action" />
                 <span className="text-sm font-normal text-gray-700">
                   Or use your own registered account
                 </span>
               </div>
             </div>
             <Link to="/sign-in">
-              <Button className="w-full font-medium bg-primary-600 hover:bg-primary-700 mt-4">
+              <Button className="w-full font-medium bg-primary-action hover:bg-primary-hover mt-4">
                 <Sparkles className="h-4 w-4 mr-2 text-white" />
                 Sign In to View Bookings
               </Button>

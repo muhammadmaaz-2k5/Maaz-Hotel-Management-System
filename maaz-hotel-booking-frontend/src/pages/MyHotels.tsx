@@ -72,7 +72,7 @@ const MyHotels = () => {
           <CardHeader>
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-full bg-primary-100">
-                <Building2 className="h-8 w-8 text-primary-600" />
+                <Building2 className="h-8 w-8 text-primary-action" />
               </div>
               <div>
                 <CardTitle className="text-lg md:text-2xl font-medium text-gray-700">
@@ -91,20 +91,20 @@ const MyHotels = () => {
             </p>
             <div className="flex flex-col gap-2 text-sm mb-4">
               <div className="flex items-center gap-2">
-                <UserCircle className="h-4 w-4 text-primary-600" />
+                <UserCircle className="h-4 w-4 text-primary-action" />
                 <span className="text-sm font-normal text-gray-700">
                   Test credentials: test@user.com / 12345678
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-primary-600" />
+                <CreditCard className="h-4 w-4 text-primary-action" />
                 <span className="text-sm font-normal text-gray-700">
                   Or use your own registered account
                 </span>
               </div>
             </div>
             <Link to="/sign-in">
-              <Button className="w-full font-medium bg-primary-600 hover:bg-primary-700 mt-4">
+              <Button className="w-full font-medium bg-primary-action hover:bg-primary-hover mt-4">
                 <Sparkles className="h-4 w-4 mr-2 text-white" />
                 Sign In to View My Hotels
               </Button>
@@ -163,7 +163,7 @@ const MyHotels = () => {
           </p>
           <Link
             to="/add-hotel"
-            className="inline-flex items-center bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors"
+            className="inline-flex items-center bg-primary-action text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-hover transition-colors"
           >
             <Plus className="w-5 h-5 " />
             Add Your First Hotel
@@ -187,7 +187,7 @@ const MyHotels = () => {
         </div>
         <Link
           to="/add-hotel"
-          className="inline-flex items-center bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl font-medium hover:from-primary-700 hover:to-primary-800 transform hover:scale-105 transition-all duration-200 shadow-medium"
+          className="inline-flex items-center bg-primary-action text-white px-6 py-3 rounded-xl font-medium hover:hover:bg-primary-hover transform hover:scale-105 transition-all duration-200 shadow-medium"
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Hotel
@@ -205,7 +205,7 @@ const MyHotels = () => {
               </p>
             </div>
             <div className="bg-primary-100 p-3 rounded-xl">
-              <Building2 className="w-6 h-6 text-primary-600" />
+              <Building2 className="w-6 h-6 text-primary-action" />
             </div>
           </div>
         </div>
@@ -288,7 +288,7 @@ const MyHotels = () => {
 
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col space-y-2">
-                <Badge className="bg-primary-600 text-white">
+                <Badge className="bg-primary-action text-white">
                   £{hotel.pricePerNight}/night
                 </Badge>
                 <Badge
@@ -321,7 +321,7 @@ const MyHotels = () => {
 
             {/* Hotel Content */}
             <div className="p-6 flex flex-col flex-grow">
-              <h2 className="text-xl font-medium text-gray-700 mb-2 group-hover:text-primary-600 transition-colors">
+              <h2 className="text-xl font-medium text-gray-700 mb-2 group-hover:text-primary-action transition-colors">
                 {hotel.name}
               </h2>
 
@@ -332,13 +332,13 @@ const MyHotels = () => {
               {/* Hotel Details */}
               <div className="grid grid-cols-2 gap-4 mb-6 flex-grow">
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <BsMap className="w-4 h-4 text-primary-600" />
+                  <BsMap className="w-4 h-4 text-primary-action" />
                   <span>
                     {hotel.city}, {hotel.country}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <BsBuilding className="w-4 h-4 text-primary-600 flex-shrink-0" />
+                  <BsBuilding className="w-4 h-4 text-primary-action flex-shrink-0" />
                   <div className="flex flex-wrap gap-1 min-h-[24px]">
                     {Array.isArray(hotel.type) ? (
                       hotel.type.map((type, index) => (
@@ -361,11 +361,11 @@ const MyHotels = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <BiMoney className="w-4 h-4 text-primary-600" />
+                  <BiMoney className="w-4 h-4 text-primary-action" />
                   <span>£{hotel.pricePerNight} per night</span>
                 </div>
                 <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <BiHotel className="w-4 h-4 text-primary-600" />
+                  <BiHotel className="w-4 h-4 text-primary-action" />
                   <span>
                     {hotel.adultCount} adults, {hotel.childCount} children
                   </span>
@@ -375,7 +375,7 @@ const MyHotels = () => {
               {/* Hotel Stats — upcoming / completed / cancelled + rating */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 bg-gray-50 rounded-xl mt-auto">
                 <div className="text-center">
-                  <p className="text-lg font-medium text-primary-700">
+                  <p className="text-lg font-medium text-primary-hover">
                     {hotel.upcomingBookings ?? 0}
                   </p>
                   <p className="text-xs text-gray-600">Upcoming</p>
@@ -407,7 +407,7 @@ const MyHotels = () => {
                 <div className="flex space-x-3">
                   <Link
                     to={`/edit-hotel/${hotel._id}`}
-                    className="flex-1 bg-primary-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-primary-700 transition-colors text-center flex items-center justify-center"
+                    className="flex-1 bg-primary-action text-white py-3 px-4 rounded-xl font-medium hover:bg-primary-hover transition-colors text-center flex items-center justify-center"
                   >
                     <Edit className="w-4 h-4 " />
                     Edit Hotel

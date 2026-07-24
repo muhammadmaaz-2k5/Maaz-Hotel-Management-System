@@ -131,10 +131,10 @@ const RADIUS_OPTIONS: { value: string; label: string; icon: LucideIcon }[] = [
 ];
 
 const inputFocusClass =
-  "pl-10 h-11 text-gray-700 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-0 focus-visible:border-primary-500";
+  "pl-10 h-11 text-gray-700 focus-visible:ring-2 focus-visible:ring-primary-action focus-visible:ring-offset-0 focus-visible:border-primary-action";
 
 const dateInputFocusClass =
-  "pr-10 h-11 text-gray-700 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-0 focus-visible:border-primary-500";
+  "pr-10 h-11 text-gray-700 focus-visible:ring-2 focus-visible:ring-primary-action focus-visible:ring-offset-0 focus-visible:border-primary-action";
 
 const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   onSearch,
@@ -469,7 +469,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors"
+          className="flex items-center gap-2 text-primary-action hover:text-primary-hover font-medium transition-colors"
         >
           <Filter className="w-4 h-4" />
           Advanced Filters
@@ -480,7 +480,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
             <button
               type="button"
               onClick={resetLocalForm}
-              className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-600 hover:text-primary-600 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-600 hover:text-primary-action transition-colors"
             >
               <Eraser className="h-4 w-4" />
               Clear Search
@@ -489,7 +489,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           <Button
             type="button"
             onClick={handleSearch}
-            className="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800"
+            className="bg-primary-action hover:hover:bg-primary-hover"
           >
             <SearchIcon className="w-4 h-4 mr-2" />
             Search Hotels
@@ -665,7 +665,7 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
               >
                 <Badge
                   variant="outline"
-                  className="cursor-pointer hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors px-3 py-1 text-sm"
+                  className="cursor-pointer hover:bg-primary-50 hover:border-primary-300 hover:text-primary-hover transition-colors px-3 py-1 text-sm"
                 >
                   {destination}
                 </Badge>

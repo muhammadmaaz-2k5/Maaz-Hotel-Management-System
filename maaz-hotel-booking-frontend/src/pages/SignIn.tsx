@@ -119,7 +119,7 @@ const SignIn = () => {
         {/* Card shell eases in; inner rows stagger as a stairway */}
         <StaggerItem index={0}>
           <Card className="relative overflow-hidden border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-600"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary-action"></div>
             <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary-100 rounded-full opacity-50"></div>
             <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary-200 rounded-full opacity-30"></div>
 
@@ -221,7 +221,7 @@ const SignIn = () => {
                     <Input
                       id="email"
                       type="email"
-                      className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                       placeholder="Enter your email"
                       {...register("email", { required: "Email is required" })}
                     />
@@ -253,7 +253,7 @@ const SignIn = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                       placeholder="Enter your password"
                       {...register("password", {
                         required: "Password is required",
@@ -294,7 +294,7 @@ const SignIn = () => {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 rounded-xl text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                    className="w-full py-3 px-4 rounded-xl text-white bg-primary-action hover:hover:bg-primary-hover transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
@@ -359,7 +359,7 @@ const SignIn = () => {
                     Don't have an account?{" "}
                     <Link
                       to="/register"
-                      className="font-medium text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                      className="font-medium text-primary-action hover:text-primary-hover transition-colors duration-200"
                     >
                       Create one here
                     </Link>
@@ -373,11 +373,11 @@ const SignIn = () => {
         <StaggerItem index={9} className="text-center">
           <p className="text-xs text-gray-500">
             By signing in, you agree to our{" "}
-            <a href="#" className="text-primary-600 hover:text-primary-700">
+            <a href="#" className="text-primary-action hover:text-primary-hover">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-primary-600 hover:text-primary-700">
+            <a href="#" className="text-primary-action hover:text-primary-hover">
               Privacy Policy
             </a>
           </p>

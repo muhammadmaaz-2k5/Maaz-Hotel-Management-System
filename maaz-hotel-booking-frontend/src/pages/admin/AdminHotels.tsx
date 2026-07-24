@@ -84,7 +84,7 @@ const AdminHotels = () => {
         cell: ({ row }) => (
           <Link
             to={`/detail/${row.original._id}`}
-            className="text-primary-600 hover:text-primary-700 text-sm"
+            className="text-primary-action hover:text-primary-hover text-sm"
           >
             View
           </Link>

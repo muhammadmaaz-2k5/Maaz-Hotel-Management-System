@@ -72,7 +72,7 @@ const Register = () => {
       <div className="max-w-xl w-full space-y-8">
         <StaggerItem index={0}>
           <Card className="relative overflow-hidden border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-primary-600"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-primary-action"></div>
             <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary-100 rounded-full opacity-50"></div>
             <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-primary-200 rounded-full opacity-30"></div>
 
@@ -120,7 +120,7 @@ const Register = () => {
                       <Input
                         id="firstName"
                         type="text"
-                        className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                        className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                         placeholder="Enter first name"
                         {...register("firstName", {
                           required: "First name is required",
@@ -154,7 +154,7 @@ const Register = () => {
                       <Input
                         id="lastName"
                         type="text"
-                        className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                        className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                         placeholder="Enter last name"
                         {...register("lastName", {
                           required: "Last name is required",
@@ -189,7 +189,7 @@ const Register = () => {
                     <Input
                       id="email"
                       type="email"
-                      className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      className="pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                       placeholder="Enter your email"
                       {...register("email", { required: "Email is required" })}
                     />
@@ -221,7 +221,7 @@ const Register = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                       placeholder="Create a password"
                       {...register("password", {
                         required: "Password is required",
@@ -272,7 +272,7 @@ const Register = () => {
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
-                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 focus:border-primary-500 transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                      className="pl-10 pr-12 py-3 border border-gray-300 rounded-xl text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-action focus:ring-offset-0 focus:border-primary-action transition-all duration-200 bg-white/80 backdrop-blur-sm"
                       placeholder="Confirm your password"
                       {...register("confirmPassword", {
                         validate: (val) => {
@@ -330,7 +330,7 @@ const Register = () => {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 rounded-xl text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
+                    className="w-full py-3 px-4 rounded-xl text-white bg-primary-action hover:hover:bg-primary-hover transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
                   >
                     {isLoading ? (
                       <div className="flex items-center">
@@ -358,7 +358,7 @@ const Register = () => {
                     Already have an account?{" "}
                     <Link
                       to="/sign-in"
-                      className="font-medium text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                      className="font-medium text-primary-action hover:text-primary-hover transition-colors duration-200"
                     >
                       Sign in here
                     </Link>
@@ -372,11 +372,11 @@ const Register = () => {
         <StaggerItem index={9} className="text-center">
           <p className="text-xs text-gray-500">
             By creating an account, you agree to our{" "}
-            <a href="#" className="text-primary-600 hover:text-primary-700">
+            <a href="#" className="text-primary-action hover:text-primary-hover">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="text-primary-600 hover:text-primary-700">
+            <a href="#" className="text-primary-action hover:text-primary-hover">
               Privacy Policy
             </a>
           </p>

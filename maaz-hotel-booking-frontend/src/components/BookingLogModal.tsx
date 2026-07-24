@@ -153,7 +153,7 @@ const BookingLogModal: React.FC<BookingLogModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Building2 className="w-6 h-6 text-primary-600" />
+              <Building2 className="w-6 h-6 text-primary-action" />
               <div>
                 <h2 className="text-lg md:text-2xl font-medium text-gray-700">
                   Booking Log - {hotelName}
@@ -365,7 +365,7 @@ const BookingLogModal: React.FC<BookingLogModalProps> = ({
           <div className="space-y-6 flex-1 min-h-[400px]">
             {isLoading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-action mx-auto"></div>
                 <p className="text-gray-600 mt-2">Loading bookings...</p>
               </div>
             ) : !bookings || bookings.length === 0 ? (
@@ -436,7 +436,7 @@ const BookingLogModal: React.FC<BookingLogModalProps> = ({
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3">
                                 <div className="bg-primary-100 p-2 rounded-xl">
-                                  <Users className="w-5 h-5 text-primary-600" />
+                                  <Users className="w-5 h-5 text-primary-action" />
                                 </div>
                                 <div>
                                   <h4 className="font-medium text-gray-700">

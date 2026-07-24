@@ -23,7 +23,7 @@ export function SelectOptionLabel({
   return (
     <span className={cn("flex min-w-0 items-center gap-2 leading-none", className)}>
       <Icon
-        className={cn("h-4 w-4 shrink-0 text-primary-600", iconClassName)}
+        className={cn("h-4 w-4 shrink-0 text-primary-action", iconClassName)}
         aria-hidden
       />
       <span className="truncate leading-none text-gray-700">{children}</span>

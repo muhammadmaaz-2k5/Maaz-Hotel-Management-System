@@ -17,7 +17,7 @@ export function InsightsCardHeader({
   icon: Icon,
   title,
   subtitle,
-  iconClassName = "bg-primary-100 text-primary-600",
+  iconClassName = "bg-primary-100 text-primary-action",
   className,
 }: InsightsCardHeaderProps) {
   return (

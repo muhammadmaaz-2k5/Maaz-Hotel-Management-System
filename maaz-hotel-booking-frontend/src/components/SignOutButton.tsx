@@ -113,7 +113,7 @@ const SignOutButton = () => {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-primary-600">
+        <DropdownMenuItem onClick={handleSignOut} className="text-primary-action">
           <LogOut className="w-4 h-4 " />
           Sign Out
         </DropdownMenuItem>

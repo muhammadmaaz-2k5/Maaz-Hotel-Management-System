@@ -33,7 +33,7 @@ const menuItemClass =
   "flex items-center py-2 rounded-xl cursor-pointer hover:bg-gray-100 focus:bg-gray-100";
 
 const linkRowClass =
-  "flex items-center gap-2 w-full text-sm font-normal leading-none text-gray-700 hover:text-primary-600";
+  "flex items-center gap-2 w-full text-sm font-normal leading-none text-gray-700 hover:text-primary-action";
 
 const UsernameMenu = () => {
   const { isLoggedIn, showToast } = useAppContext();

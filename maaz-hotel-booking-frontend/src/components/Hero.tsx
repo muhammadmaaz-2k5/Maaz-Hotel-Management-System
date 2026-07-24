@@ -9,14 +9,14 @@ import { StaggerItem } from "./ui/stagger";
  */
 const Hero = ({ onSearch }: { onSearch: (searchData: unknown) => void }) => {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800">
+    <section className="relative overflow-hidden bg-primary text-primary-foreground">
       {/* Static overlays — not StaggerItems */}
       <div
         className="pointer-events-none absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary-600/20 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-primary/20"
         aria-hidden
       />
 

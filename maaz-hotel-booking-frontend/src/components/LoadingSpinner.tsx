@@ -31,10 +31,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           {/* Spinner */}
           <div className="relative">
             <Loader2
-              className={`${sizeClasses[size]} animate-spin text-primary-600`}
+              className={`${sizeClasses[size]} animate-spin text-primary-action`}
             />
             {showHotelIcon && (
-              <Hotel className="absolute inset-0 m-auto w-4 h-4 text-primary-500 animate-pulse" />
+              <Hotel className="absolute inset-0 m-auto w-4 h-4 text-primary-action animate-pulse" />
             )}
           </div>
 
@@ -52,11 +52,11 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           <div className="flex space-x-1">
             <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
             <div
-              className="w-2 h-2 bg-primary-500 rounded-full animate-bounce"
+              className="w-2 h-2 bg-primary-action rounded-full animate-bounce"
               style={{ animationDelay: "0.1s" }}
             ></div>
             <div
-              className="w-2 h-2 bg-primary-600 rounded-full animate-bounce"
+              className="w-2 h-2 bg-primary-action rounded-full animate-bounce"
               style={{ animationDelay: "0.2s" }}
             ></div>
           </div>

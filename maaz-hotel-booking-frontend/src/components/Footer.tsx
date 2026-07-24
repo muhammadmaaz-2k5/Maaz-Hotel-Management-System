@@ -12,14 +12,14 @@ import PageContainer from "./PageContainer";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-primary-800 to-primary-900 text-white">
+    <footer className="bg-primary text-primary-foreground">
       <PageContainer className="py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="bg-white p-2 rounded-xl">
-                <Building2 className="w-6 h-6 text-primary-600" />
+                <Building2 className="w-6 h-6 text-primary-action" />
               </div>
               <span className="text-xl font-bold tracking-tight text-white mb-2">
                 Maaz Hotel Management
@@ -174,7 +174,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-primary-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-primary-hover mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-300 text-sm">
             &copy; {new Date().getFullYear()}. All rights reserved.
           </p>

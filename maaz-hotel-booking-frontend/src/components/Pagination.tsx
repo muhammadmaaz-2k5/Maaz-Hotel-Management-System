@@ -44,7 +44,7 @@ const Pagination = ({ page, pages, onPageChange }: Props) => {
               onClick={() => onPageChange(number)}
               className={cn(
                 "min-w-9",
-                page === number && "bg-primary-600 hover:bg-primary-700",
+                page === number && "bg-primary-action hover:bg-primary-hover",
               )}
               aria-current={page === number ? "page" : undefined}
             >
