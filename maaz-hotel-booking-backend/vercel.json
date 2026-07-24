@@ -1,17 +1,5 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "src/index.ts",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "src/index.ts"
-        }
-    ],
     "buildCommand": "npm run build",
     "outputDirectory": "dist",
     "env": {
@@ -22,7 +10,7 @@
         "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
         "STRIPE_API_KEY": "@stripe_api_key",
         "FRONTEND_URL": "https://hotel-mern-booking.vercel.app",
-        "BACKEND_URL": "https://maaz-hotel-management-system.vercel.app",
+        "BACKEND_URL": "https://hotel-booking-backend.arnobmahmud.com",
         "GOOGLE_ID": "@google_client_id",
         "GOOGLE_SECRET": "@google_client_secret",
         "NODE_ENV": "production",

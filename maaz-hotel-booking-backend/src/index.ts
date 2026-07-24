@@ -222,6 +222,8 @@ const server = app.listen(PORT, () => {
   console.log("🚀 ============================================");
 });
 
+export default app;
+
 // Graceful Shutdown Handler
 const gracefulShutdown = (signal: string) => {
   console.log(`\n⚠️  ${signal} received. Starting graceful shutdown...`);
