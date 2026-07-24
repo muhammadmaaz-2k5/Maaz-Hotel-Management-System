@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { check, validationResult } from "express-validator";
-import User from "../models/user";
+import { supabase } from "../lib/supabase";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -101,27 +101,33 @@ router.get("/callback/google", async (req: Request, res: Response) => {
     const lastName = lastParts.join(" ") || firstName;
     const image = googleUser.picture || undefined;
 
-    let user = await User.findOne({ email });
+    let { data: user } = await supabase.from("users").select("*").eq("email", email).single();
     if (!user) {
       const randomPassword = crypto.randomBytes(32).toString("hex");
-      user = new User({
+      const hashedPassword = await bcrypt.hash(randomPassword, 8);
+      const { data: newUser, error: insertError } = await supabase.from("users").insert([{
         email,
-        firstName: firstName || "User",
-        lastName: lastName || "Google",
-        password: randomPassword,
+        first_name: firstName || "User",
+        last_name: lastName || "Google",
+        password: hashedPassword,
         image,
-        emailVerified: true,
-      });
-      await user.save();
+        email_verified: true,
+      }]).select("*").single();
+      
+      if (insertError) throw insertError;
+      user = newUser;
     } else {
-      await User.findByIdAndUpdate(user._id, {
+      const { data: updatedUser, error: updateError } = await supabase.from("users").update({
         image,
-        emailVerified: true,
-      });
+        email_verified: true,
+      }).eq("_id", user._id).select("*").single();
+
+      if (updateError) throw updateError;
+      user = updatedUser;
     }
 
     const token = jwt.sign(
-      { userId: user.id },
+      { userId: user._id },
       process.env.JWT_SECRET_KEY as string,
       { expiresIn: "1d" }
     );
@@ -130,8 +136,8 @@ router.get("/callback/google", async (req: Request, res: Response) => {
     redirectUrl.searchParams.set("token", token);
     redirectUrl.searchParams.set("userId", String(user._id));
     redirectUrl.searchParams.set("email", user.email);
-    redirectUrl.searchParams.set("firstName", user.firstName);
-    redirectUrl.searchParams.set("lastName", user.lastName);
+    redirectUrl.searchParams.set("firstName", user.first_name);
+    redirectUrl.searchParams.set("lastName", user.last_name);
     if (image) redirectUrl.searchParams.set("image", image);
 
     res.redirect(redirectUrl.toString());
@@ -201,7 +207,7 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      const user = await User.findOne({ email });
+      const { data: user } = await supabase.from("users").select("*").eq("email", email).single();
       if (!user) {
         return res.status(400).json({ message: "Invalid Credentials" });
       }
@@ -212,7 +218,7 @@ router.post(
       }
 
       const token = jwt.sign(
-        { userId: user.id },
+        { userId: user._id },
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",
@@ -227,8 +233,8 @@ router.post(
         user: {
           id: user._id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: user.first_name,
+          lastName: user.last_name,
         },
       });
     } catch (error) {

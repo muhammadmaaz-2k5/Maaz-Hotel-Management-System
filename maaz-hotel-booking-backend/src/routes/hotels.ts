@@ -1,7 +1,5 @@
 import express, { Request, Response } from "express";
-import Hotel from "../models/hotel";
-import Booking from "../models/booking";
-import User from "../models/user";
+import { supabase } from "../lib/supabase";
 import { BookingType, HotelSearchResponse } from "../../../shared/types";
 import { param, validationResult } from "express-validator";
 import Stripe from "stripe";
@@ -14,40 +12,63 @@ const router = express.Router();
 
 router.get("/search", async (req: Request, res: Response) => {
   try {
-    const query = constructSearchQuery(req.query);
+    let query = supabase.from("hotels").select("*", { count: "exact" });
 
-    let sortOptions = {};
+    if (req.query.destination && req.query.destination.toString().trim() !== "") {
+      const dest = req.query.destination.toString().trim();
+      query = query.or(`city.ilike.%${dest}%,country.ilike.%${dest}%`);
+    }
+    if (req.query.adultCount) {
+      query = query.gte("adult_count", parseInt(req.query.adultCount as string));
+    }
+    if (req.query.childCount) {
+      query = query.gte("child_count", parseInt(req.query.childCount as string));
+    }
+    if (req.query.facilities) {
+      const facs = Array.isArray(req.query.facilities) ? req.query.facilities : [req.query.facilities];
+      query = query.contains("facilities", facs);
+    }
+    if (req.query.types) {
+      const types = Array.isArray(req.query.types) ? req.query.types : [req.query.types];
+      query = query.overlaps("type", types);
+    }
+    if (req.query.stars) {
+      const stars = Array.isArray(req.query.stars)
+        ? req.query.stars.map((s: any) => parseInt(s))
+        : [parseInt(req.query.stars as string)];
+      query = query.in("star_rating", stars);
+    }
+    if (req.query.maxPrice) {
+      query = query.lte("price_per_night", parseInt(req.query.maxPrice as string));
+    }
+
     switch (req.query.sortOption) {
       case "starRating":
-        sortOptions = { starRating: -1 };
+        query = query.order("star_rating", { ascending: false });
         break;
       case "pricePerNightAsc":
-        sortOptions = { pricePerNight: 1 };
+        query = query.order("price_per_night", { ascending: true });
         break;
       case "pricePerNightDesc":
-        sortOptions = { pricePerNight: -1 };
+        query = query.order("price_per_night", { ascending: false });
         break;
     }
 
     const pageSize = 5;
-    const pageNumber = parseInt(
-      req.query.page ? req.query.page.toString() : "1"
-    );
+    const pageNumber = parseInt(req.query.page ? req.query.page.toString() : "1");
     const skip = (pageNumber - 1) * pageSize;
 
-    const hotels = await Hotel.find(query)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(pageSize);
+    query = query.range(skip, skip + pageSize - 1);
 
-    const total = await Hotel.countDocuments(query);
+    const { data: hotels, count, error } = await query;
+    if (error) throw error;
 
     const response: HotelSearchResponse = {
-      data: hotels,
+      data: hotels as any,
       pagination: {
-        total,
+        total: count || 0,
         page: pageNumber,
-        pages: Math.ceil(total / pageSize),
+        pages: Math.ceil((count || 0) / pageSize),
       },
     };
 
@@ -60,7 +81,8 @@ router.get("/search", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const hotels = await Hotel.find().sort("-lastUpdated");
+    const { data: hotels, error } = await supabase.from("hotels").select("*").order("last_updated", { ascending: false });
+    if (error) throw error;
     res.json(hotels);
   } catch (error) {
     console.log("error", error);
@@ -82,12 +104,13 @@ router.patch(
       return res.status(400).json({ message: "isActive boolean required" });
     }
     try {
-      const hotel = await Hotel.findByIdAndUpdate(
-        req.params.id,
-        { isActive: req.body.isActive, lastUpdated: new Date() },
-        { new: true }
-      );
-      if (!hotel) {
+      const { data: hotel, error } = await supabase
+        .from("hotels")
+        .update({ is_active: req.body.isActive, updated_at: new Date().toISOString() })
+        .eq("_id", req.params.id)
+        .select("*")
+        .single();
+      if (error || !hotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
       res.json(hotel);
@@ -110,7 +133,10 @@ router.get(
     const id = req.params.id.toString();
 
     try {
-      const hotel = await Hotel.findById(id);
+      const { data: hotel, error } = await supabase.from("hotels").select("*").eq("_id", id).single();
+      if (error || !hotel) {
+        return res.status(404).json({ message: "Hotel not found" });
+      }
       res.json(hotel);
     } catch (error) {
       console.log(error);
@@ -126,12 +152,12 @@ router.post(
     const { numberOfNights } = req.body;
     const hotelId = req.params.hotelId;
 
-    const hotel = await Hotel.findById(hotelId);
+    const { data: hotel } = await supabase.from("hotels").select("price_per_night").eq("_id", hotelId).single();
     if (!hotel) {
       return res.status(400).json({ message: "Hotel not found" });
     }
 
-    const totalCost = hotel.pricePerNight * numberOfNights;
+    const totalCost = hotel.price_per_night * numberOfNights;
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalCost * 100,
@@ -184,36 +210,41 @@ router.post(
         });
       }
 
-      const newBooking: BookingType = {
-        ...req.body,
-        userId: req.userId,
-        hotelId: req.params.hotelId,
-        createdAt: new Date(), // Add booking creation timestamp
-        status: "confirmed", // Set initial status
-        paymentStatus: "paid", // Set payment status since payment succeeded
-        // Always from retrieved PI — never trust client-only value for refunds
-        stripePaymentIntentId: paymentIntent.id,
+      const newBooking = {
+        user_id: req.userId,
+        hotel_id: req.params.hotelId,
+        first_name: req.body.firstName,
+        last_name: req.body.lastName,
+        email: req.body.email,
+        adult_count: req.body.adultCount,
+        child_count: req.body.childCount,
+        check_in: req.body.checkIn,
+        check_out: req.body.checkOut,
+        total_cost: req.body.totalCost,
+        status: "confirmed",
+        payment_status: "paid",
+        stripe_payment_intent_id: paymentIntent.id,
       };
 
-      // Create booking in separate collection
-      const booking = new Booking(newBooking);
-      await booking.save();
+      const { error: bookingError } = await supabase.from("bookings").insert([newBooking]);
+      if (bookingError) throw bookingError;
 
-      // Update hotel analytics
-      await Hotel.findByIdAndUpdate(req.params.hotelId, {
-        $inc: {
-          totalBookings: 1,
-          totalRevenue: newBooking.totalCost,
-        },
-      });
+      // Supabase RPC or simple fetch and update for stats
+      const { data: hotel } = await supabase.from("hotels").select("total_bookings, total_revenue").eq("_id", req.params.hotelId).single();
+      if (hotel) {
+        await supabase.from("hotels").update({
+          total_bookings: (hotel.total_bookings || 0) + 1,
+          total_revenue: (hotel.total_revenue || 0) + req.body.totalCost
+        }).eq("_id", req.params.hotelId);
+      }
 
-      // Update user analytics
-      await User.findByIdAndUpdate(req.userId, {
-        $inc: {
-          totalBookings: 1,
-          totalSpent: newBooking.totalCost,
-        },
-      });
+      const { data: user } = await supabase.from("users").select("total_bookings, total_spent").eq("_id", req.userId).single();
+      if (user) {
+        await supabase.from("users").update({
+          total_bookings: (user.total_bookings || 0) + 1,
+          total_spent: (user.total_spent || 0) + req.body.totalCost
+        }).eq("_id", req.userId);
+      }
 
       res.status(200).send();
     } catch (error) {
@@ -223,61 +254,6 @@ router.post(
   }
 );
 
-const constructSearchQuery = (queryParams: any) => {
-  let constructedQuery: any = {};
 
-  if (queryParams.destination && queryParams.destination.trim() !== "") {
-    const destination = queryParams.destination.trim();
-
-    constructedQuery.$or = [
-      { city: { $regex: destination, $options: "i" } },
-      { country: { $regex: destination, $options: "i" } },
-    ];
-  }
-
-  if (queryParams.adultCount) {
-    constructedQuery.adultCount = {
-      $gte: parseInt(queryParams.adultCount),
-    };
-  }
-
-  if (queryParams.childCount) {
-    constructedQuery.childCount = {
-      $gte: parseInt(queryParams.childCount),
-    };
-  }
-
-  if (queryParams.facilities) {
-    constructedQuery.facilities = {
-      $all: Array.isArray(queryParams.facilities)
-        ? queryParams.facilities
-        : [queryParams.facilities],
-    };
-  }
-
-  if (queryParams.types) {
-    constructedQuery.type = {
-      $in: Array.isArray(queryParams.types)
-        ? queryParams.types
-        : [queryParams.types],
-    };
-  }
-
-  if (queryParams.stars) {
-    const starRatings = Array.isArray(queryParams.stars)
-      ? queryParams.stars.map((star: string) => parseInt(star))
-      : parseInt(queryParams.stars);
-
-    constructedQuery.starRating = { $in: starRatings };
-  }
-
-  if (queryParams.maxPrice) {
-    constructedQuery.pricePerNight = {
-      $lte: parseInt(queryParams.maxPrice).toString(),
-    };
-  }
-
-  return constructedQuery;
-};
 
 export default router;

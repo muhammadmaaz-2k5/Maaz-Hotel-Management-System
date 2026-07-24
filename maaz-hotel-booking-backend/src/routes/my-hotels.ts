@@ -1,12 +1,9 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import cloudinary from "cloudinary";
-import Hotel from "../models/hotel";
-import Booking from "../models/booking";
-import Review from "../models/review";
+import { supabase } from "../lib/supabase";
 import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
-import { HotelType } from "../../../shared/types";
 
 const router = express.Router();
 
@@ -20,7 +17,7 @@ const upload = multer({
 
 /** Classify bookings into upcoming / completed / cancelled for owner cards */
 function classifyBookingCounts(
-  bookings: Array<{ status: string; checkIn: Date; checkOut: Date }>
+  bookings: Array<{ status: string; check_in: string; check_out: string }>
 ) {
   const now = new Date();
   let upcoming = 0;
@@ -31,7 +28,7 @@ function classifyBookingCounts(
       cancelled += 1;
     } else if (
       b.status === "completed" ||
-      new Date(b.checkOut).getTime() < now.getTime()
+      new Date(b.check_out).getTime() < now.getTime()
     ) {
       completed += 1;
     } else {
@@ -66,35 +63,37 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const imageFiles = (req as any).files as any[];
-      const newHotel: HotelType = req.body;
-
-      if (typeof newHotel.type === "string") {
-        newHotel.type = [newHotel.type];
-      }
-
-      newHotel.contact = {
-        phone: req.body["contact.phone"] || "",
-        email: req.body["contact.email"] || "",
-        website: req.body["contact.website"] || "",
-      };
-
-      newHotel.policies = {
-        checkInTime: req.body["policies.checkInTime"] || "",
-        checkOutTime: req.body["policies.checkOutTime"] || "",
-        cancellationPolicy: req.body["policies.cancellationPolicy"] || "",
-        petPolicy: req.body["policies.petPolicy"] || "",
-        smokingPolicy: req.body["policies.smokingPolicy"] || "",
-      };
-
       const imageUrls = await uploadImages(imageFiles);
 
-      newHotel.imageUrls = imageUrls;
-      newHotel.lastUpdated = new Date();
-      newHotel.userId = req.userId;
+      const newHotel = {
+        name: req.body.name,
+        city: req.body.city,
+        country: req.body.country,
+        description: req.body.description,
+        type: typeof req.body.type === "string" ? [req.body.type] : req.body.type,
+        price_per_night: req.body.pricePerNight,
+        star_rating: req.body.starRating,
+        adult_count: req.body.adultCount,
+        child_count: req.body.childCount,
+        facilities: req.body.facilities,
+        contact: {
+          phone: req.body["contact.phone"] || "",
+          email: req.body["contact.email"] || "",
+          website: req.body["contact.website"] || "",
+        },
+        policies: {
+          checkInTime: req.body["policies.checkInTime"] || "",
+          checkOutTime: req.body["policies.checkOutTime"] || "",
+          cancellationPolicy: req.body["policies.cancellationPolicy"] || "",
+          petPolicy: req.body["policies.petPolicy"] || "",
+          smokingPolicy: req.body["policies.smokingPolicy"] || "",
+        },
+        user_id: req.userId,
+        image_urls: imageUrls,
+      };
 
-      const hotel = new Hotel(newHotel);
-      await hotel.save();
-
+      const { data: hotel, error } = await supabase.from("hotels").insert([newHotel]).select("*").single();
+      if (error) throw error;
       res.status(201).send(hotel);
     } catch (e) {
       console.log(e);
@@ -106,86 +105,67 @@ router.post(
 // Enriched list: booking status counts + live averageRating from Review collection
 router.get("/", verifyToken, async (req: Request, res: Response) => {
   try {
-    const hotels = await Hotel.find({ userId: req.userId });
-    const hotelIds = hotels.map((h) => h._id.toString());
+    const { data: hotels, error: hotelsError } = await supabase.from("hotels").select("*").eq("user_id", req.userId);
+    if (hotelsError || !hotels || hotels.length === 0) return res.json([]);
 
-    if (hotelIds.length === 0) {
-      return res.json([]);
-    }
+    const hotelIds = hotels.map(h => h._id);
 
-    const [allBookings, reviewAggs] = await Promise.all([
-      Booking.find({ hotelId: { $in: hotelIds } }).select(
-        "hotelId status checkIn checkOut"
-      ),
-      Review.aggregate([
-        { $match: { hotelId: { $in: hotelIds } } },
-        {
-          $group: {
-            _id: "$hotelId",
-            averageRating: { $avg: "$rating" },
-            reviewCount: { $sum: 1 },
-          },
-        },
-      ]),
-    ]);
+    const { data: allBookings } = await supabase.from("bookings").select("hotel_id, status, check_in, check_out").in("hotel_id", hotelIds);
+    const { data: allReviews } = await supabase.from("reviews").select("hotel_id, rating").in("hotel_id", hotelIds);
 
     const bookingsByHotel = new Map<string, typeof allBookings>();
-    for (const b of allBookings) {
-      const list = bookingsByHotel.get(b.hotelId) || [];
+    for (const b of allBookings || []) {
+      const list = bookingsByHotel.get(b.hotel_id) || [];
       list.push(b);
-      bookingsByHotel.set(b.hotelId, list);
+      bookingsByHotel.set(b.hotel_id, list);
     }
 
-    const reviewByHotel = new Map(
-      reviewAggs.map((r) => [
-        r._id as string,
-        {
-          averageRating: Math.round((r.averageRating as number) * 10) / 10,
-          reviewCount: r.reviewCount as number,
-        },
-      ])
-    );
+    const reviewsByHotel = new Map<string, { sum: number, count: number }>();
+    for (const r of allReviews || []) {
+      const stats = reviewsByHotel.get(r.hotel_id) || { sum: 0, count: 0 };
+      stats.sum += r.rating;
+      stats.count += 1;
+      reviewsByHotel.set(r.hotel_id, stats);
+    }
 
     const enriched = hotels.map((hotel) => {
-      const id = hotel._id.toString();
+      const id = hotel._id;
       const counts = classifyBookingCounts(bookingsByHotel.get(id) || []);
-      const review = reviewByHotel.get(id);
-      const obj = hotel.toObject();
+      const reviewStats = reviewsByHotel.get(id);
+      let avgRating = 0;
+      if (reviewStats && reviewStats.count > 0) {
+        avgRating = Math.round((reviewStats.sum / reviewStats.count) * 10) / 10;
+      }
+
       return {
-        ...obj,
+        ...hotel,
         upcomingBookings: counts.upcoming,
         completedBookings: counts.completed,
         cancelledBookings: counts.cancelled,
-        averageRating:
-          review?.averageRating ?? obj.averageRating ?? obj.starRating ?? 0,
-        reviewCount: review?.reviewCount ?? obj.reviewCount ?? 0,
+        averageRating: avgRating || hotel.average_rating || hotel.star_rating || 0,
+        reviewCount: reviewStats?.count || hotel.review_count || 0,
       };
     });
 
     res.json(enriched);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Error fetching hotels" });
   }
 });
 
 router.get("/:id", verifyToken, async (req: Request, res: Response) => {
-  const id = req.params.id.toString();
   try {
-    const hotel = await Hotel.findOne({
-      _id: id,
-      userId: req.userId,
-    });
+    const { data: hotel, error } = await supabase.from("hotels").select("*").eq("_id", req.params.id).eq("user_id", req.userId).single();
+    if (error || !hotel) {
+      return res.status(404).json({ message: "Hotel not found" });
+    }
     res.json(hotel);
   } catch (error) {
     res.status(500).json({ message: "Error fetching hotels" });
   }
 });
 
-/**
- * Owner: toggle hotel isActive.
- * PATCH /api/my-hotels/:id/active
- * Body: { isActive: boolean }
- */
 router.patch(
   "/:id/active",
   verifyToken,
@@ -194,12 +174,15 @@ router.patch(
       return res.status(400).json({ message: "isActive boolean required" });
     }
     try {
-      const hotel = await Hotel.findOneAndUpdate(
-        { _id: req.params.id, userId: req.userId },
-        { isActive: req.body.isActive, lastUpdated: new Date() },
-        { new: true }
-      );
-      if (!hotel) {
+      const { data: hotel, error } = await supabase
+        .from("hotels")
+        .update({ is_active: req.body.isActive, updated_at: new Date().toISOString() })
+        .eq("_id", req.params.id)
+        .eq("user_id", req.userId)
+        .select("*")
+        .single();
+      
+      if (error || !hotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
       res.json(hotel);
@@ -216,41 +199,34 @@ router.put(
   upload.array("imageFiles"),
   async (req: Request, res: Response) => {
     try {
-      // First, find the existing hotel
-      const existingHotel = await Hotel.findOne({
-        _id: req.params.hotelId,
-        userId: req.userId,
-      });
+      const { data: existingHotel } = await supabase.from("hotels").select("*").eq("_id", req.params.hotelId).eq("user_id", req.userId).single();
 
       if (!existingHotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
 
-      // Prepare update data
       const updateData: any = {
         name: req.body.name,
         city: req.body.city,
         country: req.body.country,
         description: req.body.description,
         type: Array.isArray(req.body.type) ? req.body.type : [req.body.type],
-        pricePerNight: Number(req.body.pricePerNight),
-        starRating: Number(req.body.starRating),
-        adultCount: Number(req.body.adultCount),
-        childCount: Number(req.body.childCount),
+        price_per_night: Number(req.body.pricePerNight),
+        star_rating: Number(req.body.starRating),
+        adult_count: Number(req.body.adultCount),
+        child_count: Number(req.body.childCount),
         facilities: Array.isArray(req.body.facilities)
           ? req.body.facilities
           : [req.body.facilities],
-        lastUpdated: new Date(),
+        updated_at: new Date().toISOString(),
       };
 
-      // Handle contact information
       updateData.contact = {
         phone: req.body["contact.phone"] || "",
         email: req.body["contact.email"] || "",
         website: req.body["contact.website"] || "",
       };
 
-      // Handle policies
       updateData.policies = {
         checkInTime: req.body["policies.checkInTime"] || "",
         checkOutTime: req.body["policies.checkOutTime"] || "",
@@ -259,24 +235,10 @@ router.put(
         smokingPolicy: req.body["policies.smokingPolicy"] || "",
       };
 
-      console.log("Update data:", updateData);
-
-      // Update the hotel
-      const updatedHotel = await Hotel.findByIdAndUpdate(
-        req.params.hotelId,
-        updateData,
-        { new: true }
-      );
-
-      if (!updatedHotel) {
-        return res.status(404).json({ message: "Hotel not found" });
-      }
-
-      // Handle image uploads if any
       const files = (req as any).files as any[];
       if (files && files.length > 0) {
         const updatedImageUrls = await uploadImages(files);
-        updatedHotel.imageUrls = [
+        updateData.image_urls = [
           ...updatedImageUrls,
           ...(req.body.imageUrls
             ? Array.isArray(req.body.imageUrls)
@@ -284,18 +246,24 @@ router.put(
               : [req.body.imageUrls]
             : []),
         ];
-        await updatedHotel.save();
+      }
+
+      const { data: updatedHotel, error } = await supabase
+        .from("hotels")
+        .update(updateData)
+        .eq("_id", req.params.hotelId)
+        .select("*")
+        .single();
+
+      if (error || !updatedHotel) {
+        return res.status(404).json({ message: "Hotel not found" });
       }
 
       res.status(200).json(updatedHotel);
     } catch (error) {
       console.error("Error updating hotel:", error);
-      console.error("Request body:", req.body);
-      console.error("Hotel ID:", req.params.hotelId);
-      console.error("User ID:", req.userId);
       res.status(500).json({
-        message: "Something went wrong",
-        error: error instanceof Error ? error.message : "Unknown error",
+        message: "Something went wrong"
       });
     }
   }
@@ -306,7 +274,7 @@ async function uploadImages(imageFiles: any[]) {
     const b64 = Buffer.from(image.buffer as Uint8Array).toString("base64");
     let dataURI = "data:" + image.mimetype + ";base64," + b64;
     const res = await cloudinary.v2.uploader.upload(dataURI, {
-      secure: true, // Force HTTPS URLs
+      secure: true,
       transformation: [
         { width: 800, height: 600, crop: "fill" },
         { quality: "auto" },

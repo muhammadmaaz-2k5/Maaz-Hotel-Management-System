@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
 import Stripe from "stripe";
-import Booking from "../models/booking";
-import Hotel from "../models/hotel";
-import User from "../models/user";
+import { supabase } from "../lib/supabase";
 import verifyToken from "../middleware/auth";
 import requireAdmin from "../middleware/requireAdmin";
 import { body, validationResult } from "express-validator";
@@ -13,36 +11,31 @@ const stripe = new Stripe(process.env.STRIPE_API_KEY as string);
 /** True when booking can still be cancelled (upcoming pending/confirmed). */
 const isCancellable = (booking: {
   status?: string;
-  checkIn: Date;
+  check_in: string;
 }): boolean => {
   const status = booking.status || "pending";
   if (status !== "pending" && status !== "confirmed") return false;
-  return new Date(booking.checkIn).getTime() > Date.now();
+  return new Date(booking.check_in).getTime() > Date.now();
 };
 
 /** Guest owns booking, or hotel owner, or admin role. */
 const assertCanCancel = async (
   req: Request,
-  booking: { userId: string; hotelId: string | { _id?: string } }
+  booking: { user_id: string; hotel_id: string }
 ): Promise<{ ok: true } | { ok: false; status: number; message: string }> => {
-  if (String(booking.userId) === req.userId) {
+  if (String(booking.user_id) === req.userId) {
     return { ok: true };
   }
 
-  const hotelId =
-    typeof booking.hotelId === "object" && booking.hotelId !== null
-      ? String(booking.hotelId._id || booking.hotelId)
-      : String(booking.hotelId);
-
-  const hotel = await Hotel.findById(hotelId);
+  const { data: hotel } = await supabase.from("hotels").select("user_id").eq("_id", booking.hotel_id).single();
   if (!hotel) {
     return { ok: false, status: 404, message: "Hotel not found" };
   }
-  if (hotel.userId === req.userId) {
+  if (hotel.user_id === req.userId) {
     return { ok: true };
   }
 
-  const user = await User.findById(req.userId);
+  const { data: user } = await supabase.from("users").select("role").eq("_id", req.userId).single();
   if (user?.role === "admin") {
     return { ok: true };
   }
@@ -55,14 +48,14 @@ const assertOwnerOrAdmin = async (
   req: Request,
   hotelId: string
 ): Promise<{ ok: true } | { ok: false; status: number; message: string }> => {
-  const hotel = await Hotel.findById(hotelId);
+  const { data: hotel } = await supabase.from("hotels").select("user_id").eq("_id", hotelId).single();
   if (!hotel) {
     return { ok: false, status: 404, message: "Hotel not found" };
   }
-  if (hotel.userId === req.userId) {
+  if (hotel.user_id === req.userId) {
     return { ok: true };
   }
-  const user = await User.findById(req.userId);
+  const { data: user } = await supabase.from("users").select("role").eq("_id", req.userId).single();
   if (user?.role === "admin") {
     return { ok: true };
   }
@@ -72,10 +65,12 @@ const assertOwnerOrAdmin = async (
 // Get all bookings (admin only)
 router.get("/", verifyToken, requireAdmin, async (_req: Request, res: Response) => {
   try {
-    const bookings = await Booking.find()
-      .sort({ createdAt: -1 })
-      .populate("hotelId", "name city country");
+    const { data: bookings, error } = await supabase
+      .from("bookings")
+      .select("*, hotels (name, city, country)")
+      .order("created_at", { ascending: false });
 
+    if (error) throw error;
     res.status(200).json(bookings);
   } catch (error) {
     console.log(error);
@@ -91,22 +86,25 @@ router.get(
     try {
       const { hotelId } = req.params;
 
-      const hotel = await Hotel.findById(hotelId);
+      const { data: hotel } = await supabase.from("hotels").select("user_id").eq("_id", hotelId).single();
       if (!hotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
 
-      if (hotel.userId !== req.userId) {
-        const user = await User.findById(req.userId);
+      if (hotel.user_id !== req.userId) {
+        const { data: user } = await supabase.from("users").select("role").eq("_id", req.userId).single();
         if (user?.role !== "admin") {
           return res.status(403).json({ message: "Access denied" });
         }
       }
 
-      const bookings = await Booking.find({ hotelId })
-        .sort({ createdAt: -1 })
-        .populate("userId", "firstName lastName email");
+      const { data: bookings, error } = await supabase
+        .from("bookings")
+        .select("*, users (first_name, last_name, email)")
+        .eq("hotel_id", hotelId)
+        .order("created_at", { ascending: false });
 
+      if (error) throw error;
       res.status(200).json(bookings);
     } catch (error) {
       console.log(error);
@@ -125,7 +123,7 @@ router.post(
   verifyToken,
   async (req: Request, res: Response) => {
     try {
-      const booking = await Booking.findById(req.params.id);
+      const { data: booking } = await supabase.from("bookings").select("*").eq("_id", req.params.id).single();
       if (!booking) {
         return res.status(404).json({ message: "Booking not found" });
       }
@@ -149,17 +147,17 @@ router.post(
 
       let refundAmount = 0;
       let refundSkipped: string | undefined;
-      const wasPaid = booking.paymentStatus === "paid";
+      const wasPaid = booking.payment_status === "paid";
 
-      if (wasPaid && booking.stripePaymentIntentId) {
+      if (wasPaid && booking.stripe_payment_intent_id) {
         try {
           const refund = await stripe.refunds.create({
-            payment_intent: booking.stripePaymentIntentId,
+            payment_intent: booking.stripe_payment_intent_id,
           });
           refundAmount =
             typeof refund.amount === "number"
               ? refund.amount / 100
-              : booking.totalCost;
+              : booking.total_cost;
         } catch (stripeErr: unknown) {
           const msg =
             stripeErr instanceof Error
@@ -168,43 +166,50 @@ router.post(
           console.log(stripeErr);
           return res.status(502).json({ message: msg });
         }
-      } else if (wasPaid && !booking.stripePaymentIntentId) {
+      } else if (wasPaid && !booking.stripe_payment_intent_id) {
         // Legacy bookings created before PI persistence — cancel without fake refund
         refundSkipped =
           "Cancelled without Stripe refund (no payment intent on file)";
       }
 
-      booking.status = "cancelled";
-      if (wasPaid && booking.stripePaymentIntentId && refundAmount > 0) {
-        booking.paymentStatus = "refunded";
-        booking.refundAmount = refundAmount;
-      } else if (wasPaid && !booking.stripePaymentIntentId) {
-        // Keep paymentStatus as paid so UI shows cancel without claiming refund
-        booking.refundAmount = 0;
+      const updateData: any = {
+        status: "cancelled",
+        updated_at: new Date().toISOString()
+      };
+      
+      if (wasPaid && booking.stripe_payment_intent_id && refundAmount > 0) {
+        updateData.payment_status = "refunded";
+        updateData.refund_amount = refundAmount;
+      } else if (wasPaid && !booking.stripe_payment_intent_id) {
+        updateData.refund_amount = 0;
       }
       if (cancellationReason) {
-        booking.cancellationReason = cancellationReason;
+        updateData.cancellation_reason = cancellationReason;
       }
-      await booking.save();
+      
+      const { data: updatedBooking } = await supabase.from("bookings").update(updateData).eq("_id", booking._id).select("*").single();
 
       // Mirror create increments only when this booking had been counted as paid revenue
       if (wasPaid) {
-        await Hotel.findByIdAndUpdate(booking.hotelId, {
-          $inc: {
-            totalBookings: -1,
-            totalRevenue: -(booking.totalCost || 0),
-          },
-        });
-        await User.findByIdAndUpdate(booking.userId, {
-          $inc: {
-            totalBookings: -1,
-            totalSpent: -(booking.totalCost || 0),
-          },
-        });
+        const { data: hotelToUpdate } = await supabase.from("hotels").select("total_bookings, total_revenue").eq("_id", booking.hotel_id).single();
+        if (hotelToUpdate) {
+            await supabase.from("hotels").update({
+                total_bookings: (hotelToUpdate.total_bookings || 0) - 1,
+                total_revenue: (hotelToUpdate.total_revenue || 0) - (booking.total_cost || 0)
+            }).eq("_id", booking.hotel_id);
+        }
+
+        const { data: userToUpdate } = await supabase.from("users").select("total_bookings, total_spent").eq("_id", booking.user_id).single();
+        if (userToUpdate) {
+            await supabase.from("users").update({
+                total_bookings: (userToUpdate.total_bookings || 0) - 1,
+                total_spent: (userToUpdate.total_spent || 0) - (booking.total_cost || 0)
+            }).eq("_id", booking.user_id);
+        }
       }
 
       res.status(200).json({
-        booking,
+        booking: updatedBooking,
         refundAmount,
         refundSkipped,
       });
@@ -218,12 +223,13 @@ router.post(
 // Get booking by ID
 router.get("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
-    const booking = await Booking.findById(req.params.id).populate(
-      "hotelId",
-      "name city country imageUrls"
-    );
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .select("*, hotels(name, city, country, image_urls)")
+      .eq("_id", req.params.id)
+      .single();
 
-    if (!booking) {
+    if (error || !booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
@@ -255,12 +261,12 @@ router.patch(
     }
 
     try {
-      const existing = await Booking.findById(req.params.id);
+      const { data: existing } = await supabase.from("bookings").select("hotel_id").eq("_id", req.params.id).single();
       if (!existing) {
         return res.status(404).json({ message: "Booking not found" });
       }
 
-      const authz = await assertOwnerOrAdmin(req, existing.hotelId);
+      const authz = await assertOwnerOrAdmin(req, existing.hotel_id);
       if (authz.ok === false) {
         return res.status(authz.status).json({ message: authz.message });
       }
@@ -274,16 +280,12 @@ router.patch(
         });
       }
 
-      const updateData: Record<string, unknown> = { status };
+      const updateData: any = { status, updated_at: new Date().toISOString() };
       if (cancellationReason) {
-        updateData.cancellationReason = cancellationReason;
+        updateData.cancellation_reason = cancellationReason;
       }
 
-      const booking = await Booking.findByIdAndUpdate(
-        req.params.id,
-        updateData,
-        { new: true }
-      );
+      const { data: booking } = await supabase.from("bookings").update(updateData).eq("_id", req.params.id).select("*").single();
 
       res.status(200).json(booking);
     } catch (error) {
@@ -309,28 +311,24 @@ router.patch(
     }
 
     try {
-      const existing = await Booking.findById(req.params.id);
+      const { data: existing } = await supabase.from("bookings").select("hotel_id").eq("_id", req.params.id).single();
       if (!existing) {
         return res.status(404).json({ message: "Booking not found" });
       }
 
-      const authz = await assertOwnerOrAdmin(req, existing.hotelId);
+      const authz = await assertOwnerOrAdmin(req, existing.hotel_id);
       if (authz.ok === false) {
         return res.status(authz.status).json({ message: authz.message });
       }
 
       const { paymentStatus, paymentMethod } = req.body;
 
-      const updateData: Record<string, unknown> = { paymentStatus };
+      const updateData: any = { payment_status: paymentStatus, updated_at: new Date().toISOString() };
       if (paymentMethod) {
-        updateData.paymentMethod = paymentMethod;
+        updateData.payment_method = paymentMethod;
       }
 
-      const booking = await Booking.findByIdAndUpdate(
-        req.params.id,
-        updateData,
-        { new: true }
-      );
+      const { data: booking } = await supabase.from("bookings").update(updateData).eq("_id", req.params.id).select("*").single();
 
       res.status(200).json(booking);
     } catch (error) {
@@ -347,32 +345,36 @@ router.delete(
   requireAdmin,
   async (req: Request, res: Response) => {
   try {
-    const booking = await Booking.findByIdAndDelete(req.params.id);
-
+    const { data: booking } = await supabase.from("bookings").select("*").eq("_id", req.params.id).single();
+    
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
+    
+    await supabase.from("bookings").delete().eq("_id", req.params.id);
 
     // Skip analytics decrement if cancel already adjusted totals
     const alreadyAdjusted =
       booking.status === "cancelled" ||
       booking.status === "refunded" ||
-      booking.paymentStatus === "refunded";
+      booking.payment_status === "refunded";
 
     if (!alreadyAdjusted) {
-      await Hotel.findByIdAndUpdate(booking.hotelId, {
-        $inc: {
-          totalBookings: -1,
-          totalRevenue: -(booking.totalCost || 0),
-        },
-      });
+        const { data: hotelToUpdate } = await supabase.from("hotels").select("total_bookings, total_revenue").eq("_id", booking.hotel_id).single();
+        if (hotelToUpdate) {
+            await supabase.from("hotels").update({
+                total_bookings: (hotelToUpdate.total_bookings || 0) - 1,
+                total_revenue: (hotelToUpdate.total_revenue || 0) - (booking.total_cost || 0)
+            }).eq("_id", booking.hotel_id);
+        }
 
-      await User.findByIdAndUpdate(booking.userId, {
-        $inc: {
-          totalBookings: -1,
-          totalSpent: -(booking.totalCost || 0),
-        },
-      });
+        const { data: userToUpdate } = await supabase.from("users").select("total_bookings, total_spent").eq("_id", booking.user_id).single();
+        if (userToUpdate) {
+            await supabase.from("users").update({
+                total_bookings: (userToUpdate.total_bookings || 0) - 1,
+                total_spent: (userToUpdate.total_spent || 0) - (booking.total_cost || 0)
+            }).eq("_id", booking.user_id);
+        }
     }
 
     res.status(200).json({ message: "Booking deleted successfully" });

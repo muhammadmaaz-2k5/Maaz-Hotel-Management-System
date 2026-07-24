@@ -1,38 +1,43 @@
 import express, { Request, Response } from "express";
 import verifyToken from "../middleware/auth";
-import Hotel from "../models/hotel";
-import Booking from "../models/booking";
+import { supabase } from "../lib/supabase";
 
 const router = express.Router();
 
 // /api/my-bookings
 router.get("/", verifyToken, async (req: Request, res: Response) => {
   try {
-    // Get user's bookings from separate collection
-    const userBookings = await Booking.find({ userId: req.userId }).sort({
-      createdAt: -1,
-    });
+    const { data: userBookings, error: bookingsError } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("user_id", req.userId)
+      .order("created_at", { ascending: false });
 
-    // Get hotel details for each booking
-    const results = await Promise.all(
-      userBookings.map(async (booking) => {
-        const hotel = await Hotel.findById(booking.hotelId);
-        if (!hotel) {
-          return null;
-        }
+    if (bookingsError || !userBookings) {
+      throw bookingsError;
+    }
 
-        // Create response object with hotel and booking data
-        const hotelWithUserBookings = {
-          ...hotel.toObject(),
-          bookings: [booking.toObject()],
-        };
+    if (userBookings.length === 0) return res.status(200).send([]);
 
-        return hotelWithUserBookings;
-      })
-    );
+    const hotelIds = [...new Set(userBookings.map((b) => b.hotel_id))];
+    const { data: hotels, error: hotelsError } = await supabase
+      .from("hotels")
+      .select("*")
+      .in("_id", hotelIds);
 
-    // Filter out null results and send
-    const validResults = results.filter((result) => result !== null);
+    if (hotelsError) throw hotelsError;
+
+    const hotelsMap = new Map(hotels?.map(h => [h._id, h]));
+
+    const validResults = userBookings.map(booking => {
+      const hotel = hotelsMap.get(booking.hotel_id);
+      if (!hotel) return null;
+      return {
+        ...hotel,
+        bookings: [booking]
+      };
+    }).filter(r => r !== null);
+
     res.status(200).send(validResults);
   } catch (error) {
     console.log(error);

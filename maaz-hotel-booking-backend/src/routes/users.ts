@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import User from "../models/user";
+import { supabase } from "../lib/supabase";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import verifyToken from "../middleware/auth";
@@ -12,8 +13,13 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
   const userId = req.userId;
 
   try {
-    const user = await User.findById(userId).select("-password");
-    if (!user) {
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("email, first_name, last_name, role, is_active") // Exclude password
+      .eq("_id", userId)
+      .single();
+
+    if (error || !user) {
       return res.status(400).json({ message: "User not found" });
     }
     res.json(user);
@@ -33,12 +39,13 @@ router.get(
   requireAdmin,
   async (_req: Request, res: Response) => {
     try {
-      const users = await User.find()
-        .select(
-          "email firstName lastName role isActive totalBookings totalSpent createdAt"
-        )
-        .sort({ createdAt: -1 })
+      const { data: users, error } = await supabase
+        .from("users")
+        .select("email, first_name, last_name, role, is_active, total_bookings, total_spent, created_at")
+        .order("created_at", { ascending: false })
         .limit(200);
+
+      if (error) throw error;
       res.json(users);
     } catch (error) {
       console.log(error);
@@ -72,13 +79,14 @@ router.patch(
         });
       }
 
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        { role, updatedAt: new Date() },
-        { new: true }
-      ).select("-password");
+      const { data: user, error } = await supabase
+        .from("users")
+        .update({ role, updated_at: new Date().toISOString() })
+        .eq("_id", req.params.id)
+        .select("email, first_name, last_name, role, is_active")
+        .single();
 
-      if (!user) {
+      if (error || !user) {
         return res.status(404).json({ message: "User not found" });
       }
       res.json(user);
@@ -106,19 +114,35 @@ router.post(
     }
 
     try {
-      let user = await User.findOne({
-        email: req.body.email,
-      });
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("_id")
+        .eq("email", req.body.email)
+        .single();
 
-      if (user) {
+      if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      user = new User(req.body);
-      await user.save();
+      const hashedPassword = await bcrypt.hash(req.body.password, 8);
+
+      const { data: newUser, error } = await supabase
+        .from("users")
+        .insert([{
+          email: req.body.email,
+          first_name: req.body.firstName,
+          last_name: req.body.lastName,
+          password: hashedPassword
+        }])
+        .select("_id")
+        .single();
+
+      if (error || !newUser) {
+        throw error || new Error("Failed to create user");
+      }
 
       const token = jwt.sign(
-        { userId: user.id },
+        { userId: newUser._id },
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",

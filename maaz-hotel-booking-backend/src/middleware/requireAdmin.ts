@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import User from "../models/user";
+import { supabase } from "../lib/supabase";
 
 /**
  * Requires verifyToken first. Loads User.role from DB (JWT has userId only).
@@ -10,7 +10,7 @@ const requireAdmin = async (
   next: NextFunction
 ) => {
   try {
-    const user = await User.findById(req.userId).select("role");
+    const { data: user } = await supabase.from("users").select("role").eq("_id", req.userId).single();
     if (!user || user.role !== "admin") {
       return res.status(403).json({ message: "Access denied" });
     }

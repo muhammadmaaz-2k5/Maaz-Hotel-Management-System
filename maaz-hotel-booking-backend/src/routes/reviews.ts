@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
 import { body, validationResult } from "express-validator";
-import Review from "../models/review";
-import Hotel from "../models/hotel";
-import Booking from "../models/booking";
+import { supabase } from "../lib/supabase";
 import verifyToken from "../middleware/auth";
 import requireAdmin from "../middleware/requireAdmin";
 
@@ -19,7 +17,13 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const limit = Math.min(parseInt(String(req.query.limit || "100"), 10), 200);
-      const reviews = await Review.find().sort({ createdAt: -1 }).limit(limit);
+      const { data: reviews, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
       res.json(reviews);
     } catch {
       res.status(500).json({ message: "Error fetching reviews" });
@@ -33,9 +37,14 @@ router.get(
  */
 router.get("/hotel/:hotelId", async (req: Request, res: Response) => {
   try {
-    const reviews = await Review.find({ hotelId: req.params.hotelId })
-      .sort({ createdAt: -1 })
+    const { data: reviews, error } = await supabase
+      .from("reviews")
+      .select("*, users(first_name, last_name, image)")
+      .eq("hotel_id", req.params.hotelId)
+      .order("created_at", { ascending: false })
       .limit(100);
+
+    if (error) throw error;
     res.json(reviews);
   } catch {
     res.status(500).json({ message: "Error fetching reviews" });
@@ -48,22 +57,26 @@ router.get("/hotel/:hotelId", async (req: Request, res: Response) => {
  */
 router.get("/hotel/:hotelId/summary", async (req: Request, res: Response) => {
   try {
-    const [agg] = await Review.aggregate([
-      { $match: { hotelId: req.params.hotelId } },
-      {
-        $group: {
-          _id: "$hotelId",
-          averageRating: { $avg: "$rating" },
-          reviewCount: { $sum: 1 },
-        },
-      },
-    ]);
+    const { data: reviews, error } = await supabase
+      .from("reviews")
+      .select("rating")
+      .eq("hotel_id", req.params.hotelId);
+
+    if (error) throw error;
+
+    let averageRating = 0;
+    let reviewCount = 0;
+
+    if (reviews && reviews.length > 0) {
+      reviewCount = reviews.length;
+      const sum = reviews.reduce((acc, curr) => acc + curr.rating, 0);
+      averageRating = Math.round((sum / reviewCount) * 10) / 10;
+    }
+
     res.json({
       hotelId: req.params.hotelId,
-      averageRating: agg
-        ? Math.round((agg.averageRating as number) * 10) / 10
-        : 0,
-      reviewCount: agg?.reviewCount ?? 0,
+      averageRating,
+      reviewCount,
     });
   } catch {
     res.status(500).json({ message: "Error fetching review summary" });
@@ -97,51 +110,56 @@ router.post(
     try {
       const { hotelId, bookingId, rating, comment, categories } = req.body;
 
-      const hotel = await Hotel.findById(hotelId);
+      const { data: hotel } = await supabase.from("hotels").select("*").eq("_id", hotelId).single();
       if (!hotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
 
-      const booking = await Booking.findOne({
-        _id: bookingId,
-        userId: req.userId,
-        hotelId,
-      });
+      const { data: booking } = await supabase.from("bookings")
+        .select("*")
+        .eq("_id", bookingId)
+        .eq("user_id", req.userId)
+        .eq("hotel_id", hotelId)
+        .single();
+        
       if (!booking) {
         return res.status(403).json({ message: "Booking not found for this user/hotel" });
       }
 
-      const existing = await Review.findOne({ bookingId, userId: req.userId });
+      const { data: existing } = await supabase.from("reviews")
+        .select("_id")
+        .eq("booking_id", bookingId)
+        .eq("user_id", req.userId)
+        .single();
+        
       if (existing) {
         return res.status(409).json({ message: "Review already exists for this booking" });
       }
 
-      const review = new Review({
-        userId: req.userId,
-        hotelId,
-        bookingId,
+      const newReview = {
+        user_id: req.userId,
+        hotel_id: hotelId,
+        booking_id: bookingId,
         rating,
         comment,
         categories,
-        isVerified: booking.paymentStatus === "paid",
-      });
-      await review.save();
+        is_verified: booking.payment_status === "paid",
+      };
 
-      // Keep hotel document averages in sync for public listings
-      const [agg] = await Review.aggregate([
-        { $match: { hotelId } },
-        {
-          $group: {
-            _id: "$hotelId",
-            averageRating: { $avg: "$rating" },
-            reviewCount: { $sum: 1 },
-          },
-        },
-      ]);
-      if (agg) {
-        hotel.averageRating = Math.round((agg.averageRating as number) * 10) / 10;
-        hotel.reviewCount = agg.reviewCount as number;
-        await hotel.save();
+      const { data: review, error } = await supabase.from("reviews").insert([newReview]).select("*").single();
+      if (error) throw error;
+
+      // Update hotel average ratings
+      const { data: allReviews } = await supabase.from("reviews").select("rating").eq("hotel_id", hotelId);
+      if (allReviews && allReviews.length > 0) {
+        const sum = allReviews.reduce((acc, curr) => acc + curr.rating, 0);
+        const count = allReviews.length;
+        const avg = Math.round((sum / count) * 10) / 10;
+        
+        await supabase.from("hotels").update({
+          average_rating: avg,
+          review_count: count
+        }).eq("_id", hotelId);
       }
 
       res.status(201).json(review);

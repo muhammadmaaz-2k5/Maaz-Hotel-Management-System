@@ -4,15 +4,16 @@
   "description": "booking mern app backend",
   "main": "./src/index.ts",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon --exec npx tsx src/index.ts --ext ts",
     "build": "tsc --skipLibCheck",
     "start": "node dist/hotel-booking-backend/src/index.js",
-    "seed": "ts-node src/scripts/seed.ts",
-    "e2e": "cross-env DOTENV_CONFIG_PATH=.env.e2e nodemon"
+    "seed": "npx tsx src/scripts/seed.ts",
+    "e2e": "cross-env DOTENV_CONFIG_PATH=.env.e2e nodemon --exec npx tsx src/index.ts --ext ts"
   },
   "author": "Arnob Mahmud",
   "license": "ISC",
   "dependencies": {
+    "@supabase/server": "^1.4.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.6",
@@ -37,7 +38,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.2.0",
-    "mongoose": "^8.0.0",
     "morgan": "^1.10.1",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.0.1",
