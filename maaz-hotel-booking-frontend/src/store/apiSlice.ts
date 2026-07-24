@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react';
 import { getApiBaseUrl } from '../lib/api-client';
-import Cookies from '../../node_modules/@types/js-cookie';
+import Cookies from 'js-cookie';
 import {
   HotelSearchResponse,
   HotelType,

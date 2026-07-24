@@ -1,5 +1,5 @@
 import axios, { InternalAxiosRequestConfig } from "axios";
-import Cookies from "../../node_modules/@types/js-cookie";
+import Cookies from "js-cookie";
 
 // API origin: copy .env.local.example → .env.local. Canonical local backend port is 5001 (see backend PORT).
 const getBaseURL = () => {

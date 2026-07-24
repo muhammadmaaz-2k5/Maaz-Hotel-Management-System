@@ -4,6 +4,8 @@ import { AiFillStar } from "react-icons/ai";
 import GuestInfoForm from "../forms/GuestInfoForm/GuestInfoForm";
 import { Badge } from "../components/ui/badge";
 import { SafeImage } from "../components/ui/safe-image";
+import { theme } from "../lib/theme";
+import { cn } from "../lib/utils";
 
 import {
   MapPin,
@@ -56,7 +58,7 @@ const Detail = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={theme.layout.section}>
       <div>
         <span className="flex">
           {Array.from({ length: hotel.starRating }).map((_, i) => (
@@ -195,178 +197,186 @@ const Detail = () => {
 
       {/* Contact Information */}
       {hotel.contact && (
-        <div className="border border-slate-300 rounded-xl p-4">
-          <h3 className="text-xl font-medium mb-3">Contact Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {hotel.contact.phone && (
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-gray-600" />
-                <span>
-                  <span className="font-medium text-gray-700">Phone:</span>{" "}
-                  {hotel.contact.phone}
-                </span>
-              </div>
-            )}
-            {hotel.contact.email && (
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-gray-600" />
-                <span>
-                  <span className="font-medium text-gray-700">Email:</span>{" "}
-                  {hotel.contact.email}
-                </span>
-              </div>
-            )}
-            {hotel.contact.website && (
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-gray-600" />
-                <span>
-                  <span className="font-medium text-gray-700">Website:</span>{" "}
-                  <a
-                    href={hotel.contact.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    www.arnobmahmud.com
-                  </a>
-                </span>
-              </div>
-            )}
+        <div className={theme.card.base}>
+          <div className={theme.card.body}>
+            <h3 className={theme.typography.h3}>Contact Information</h3>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {hotel.contact.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-600" />
+                  <span>
+                    <span className={theme.typography.label}>Phone:</span>{" "}
+                    {hotel.contact.phone}
+                  </span>
+                </div>
+              )}
+              {hotel.contact.email && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span>
+                    <span className={theme.typography.label}>Email:</span>{" "}
+                    {hotel.contact.email}
+                  </span>
+                </div>
+              )}
+              {hotel.contact.website && (
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span>
+                    <span className={theme.typography.label}>Website:</span>{" "}
+                    <a
+                      href={hotel.contact.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      www.arnobmahmud.com
+                    </a>
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* Hotel Policies */}
       {hotel.policies && (
-        <div className="border border-slate-300 rounded-xl p-4">
-          <h3 className="text-xl font-medium mb-3">Hotel Policies</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {hotel.policies.checkInTime && (
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-600" />
-                <span>
-                  <span className="font-medium text-gray-700">Check-in:</span>{" "}
-                  {hotel.policies.checkInTime}
-                </span>
-              </div>
-            )}
-            {hotel.policies.checkOutTime && (
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-600" />
-                <span>
-                  <span className="font-medium text-gray-700">Check-out:</span>{" "}
-                  {hotel.policies.checkOutTime}
-                </span>
-              </div>
-            )}
-            {hotel.policies.cancellationPolicy && (
-              <div>
-                <span className="font-medium text-gray-700">Cancellation:</span>{" "}
-                {hotel.policies.cancellationPolicy}
-              </div>
-            )}
-            {hotel.policies.petPolicy && (
-              <div>
-                <span className="font-medium text-gray-700">Pet Policy:</span>{" "}
-                {hotel.policies.petPolicy}
-              </div>
-            )}
-            {hotel.policies.smokingPolicy && (
-              <div>
-                <span className="font-medium text-gray-700">Smoking:</span>{" "}
-                {hotel.policies.smokingPolicy}
-              </div>
-            )}
+        <div className={theme.card.base}>
+          <div className={theme.card.body}>
+            <h3 className={theme.typography.h3}>Hotel Policies</h3>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {hotel.policies.checkInTime && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-600" />
+                  <span>
+                    <span className={theme.typography.label}>Check-in:</span>{" "}
+                    {hotel.policies.checkInTime}
+                  </span>
+                </div>
+              )}
+              {hotel.policies.checkOutTime && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-600" />
+                  <span>
+                    <span className={theme.typography.label}>Check-out:</span>{" "}
+                    {hotel.policies.checkOutTime}
+                  </span>
+                </div>
+              )}
+              {hotel.policies.cancellationPolicy && (
+                <div>
+                  <span className={theme.typography.label}>Cancellation:</span>{" "}
+                  {hotel.policies.cancellationPolicy}
+                </div>
+              )}
+              {hotel.policies.petPolicy && (
+                <div>
+                  <span className={theme.typography.label}>Pet Policy:</span>{" "}
+                  {hotel.policies.petPolicy}
+                </div>
+              )}
+              {hotel.policies.smokingPolicy && (
+                <div>
+                  <span className={theme.typography.label}>Smoking:</span>{" "}
+                  {hotel.policies.smokingPolicy}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
       {/* Facilities */}
-      <div className="border border-slate-300 rounded-xl p-4">
-        <h3 className="text-xl font-medium mb-3">Facilities</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {hotel.facilities.map((facility: string) => (
-            <div key={facility} className="flex items-center gap-2">
-              <div className="w-4 h-4 text-green-600">
-                {facility === "Free WiFi" && <Wifi className="w-4 h-4" />}
-                {facility === "Parking" && <Car className="w-4 h-4" />}
-                {facility === "Airport Shuttle" && (
-                  <Plane className="w-4 h-4" />
-                )}
-                {facility === "Outdoor Pool" && <Waves className="w-4 h-4" />}
-                {facility === "Spa" && <Sparkles className="w-4 h-4" />}
-                {facility === "Fitness Center" && (
-                  <Dumbbell className="w-4 h-4" />
-                )}
-                {facility === "Family Rooms" && (
-                  <Building2 className="w-4 h-4" />
-                )}
-                {facility === "Non-Smoking Rooms" && (
-                  <Building2 className="w-4 h-4" />
-                )}
-                {![
-                  "Free WiFi",
-                  "Parking",
-                  "Airport Shuttle",
-                  "Outdoor Pool",
-                  "Spa",
-                  "Fitness Center",
-                  "Family Rooms",
-                  "Non-Smoking Rooms",
-                ].includes(facility) && <Building2 className="w-4 h-4" />}
+      <div className={theme.card.base}>
+        <div className={theme.card.body}>
+          <h3 className={theme.typography.h3}>Facilities</h3>
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+            {hotel.facilities.map((facility: string) => (
+              <div key={facility} className="flex items-center gap-2">
+                <div className="w-4 h-4 text-green-600">
+                  {facility === "Free WiFi" && <Wifi className="w-4 h-4" />}
+                  {facility === "Parking" && <Car className="w-4 h-4" />}
+                  {facility === "Airport Shuttle" && (
+                    <Plane className="w-4 h-4" />
+                  )}
+                  {facility === "Outdoor Pool" && <Waves className="w-4 h-4" />}
+                  {facility === "Spa" && <Sparkles className="w-4 h-4" />}
+                  {facility === "Fitness Center" && (
+                    <Dumbbell className="w-4 h-4" />
+                  )}
+                  {facility === "Family Rooms" && (
+                    <Building2 className="w-4 h-4" />
+                  )}
+                  {facility === "Non-Smoking Rooms" && (
+                    <Building2 className="w-4 h-4" />
+                  )}
+                  {![
+                    "Free WiFi",
+                    "Parking",
+                    "Airport Shuttle",
+                    "Outdoor Pool",
+                    "Spa",
+                    "Fitness Center",
+                    "Family Rooms",
+                    "Non-Smoking Rooms",
+                  ].includes(facility) && <Building2 className="w-4 h-4" />}
+                </div>
+                <span>{facility}</span>
               </div>
-              <span>{facility}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Guest Reviews */}
-      <div className="border border-slate-300 rounded-xl p-4">
-        <h3 className="text-xl font-medium mb-3">Guest Reviews</h3>
-        {isReviewsLoading ? (
-          <div className="space-y-3">
-            {[1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-16 bg-gray-100 rounded-xl animate-pulse"
-              />
-            ))}
-          </div>
-        ) : !reviews || reviews.length === 0 ? (
-          <p className="text-gray-500 text-sm">
-            No reviews yet. Guests can leave a review from My Bookings after
-            their stay.
-          </p>
-        ) : (
-          <ul className="space-y-4">
-            {reviews.map((review: any) => (
-              <li
-                key={review._id}
-                className="border-b border-gray-100 pb-3 last:border-0"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-gray-700">
-                    {review.rating.toFixed(1)}★
-                  </span>
-                  {review.isVerified && (
-                    <Badge variant="outline" className="text-xs">
-                      Verified stay
-                    </Badge>
-                  )}
-                  {review.createdAt && (
-                    <span className="text-xs text-gray-400">
-                      {new Date(review.createdAt).toLocaleDateString()}
+      <div className={theme.card.base}>
+        <div className={theme.card.body}>
+          <h3 className={theme.typography.h3}>Guest Reviews</h3>
+          {isReviewsLoading ? (
+            <div className="mt-4 space-y-3">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-16 bg-gray-100 rounded-xl animate-pulse"
+                />
+              ))}
+            </div>
+          ) : !reviews || reviews.length === 0 ? (
+            <p className={cn(theme.typography.muted, "mt-4")}>
+              No reviews yet. Guests can leave a review from My Bookings after
+              their stay.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-4">
+              {reviews.map((review: any) => (
+                <li
+                  key={review._id}
+                  className="border-b border-gray-100 pb-3 last:border-0"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={theme.typography.label}>
+                      {review.rating.toFixed(1)}★
                     </span>
-                  )}
-                </div>
-                <p className="text-gray-700 text-sm whitespace-pre-line">
-                  {review.comment}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+                    {review.isVerified && (
+                      <Badge variant="outline" className="text-xs">
+                        Verified stay
+                      </Badge>
+                    )}
+                    {review.createdAt && (
+                      <span className="text-xs text-gray-400">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                  <p className={cn(theme.typography.body, "text-sm whitespace-pre-line")}>
+                    {review.comment}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr]">

@@ -28,6 +28,8 @@ import {
 import useAppContext from "../hooks/useAppContext";
 import WriteReviewForm from "../components/WriteReviewForm";
 import CancelBookingButton from "../components/CancelBookingButton";
+import { theme } from "../lib/theme";
+import { cn } from "../lib/utils";
 
 const MyBookings = () => {
   const { isLoggedIn } = useAppContext();
@@ -92,7 +94,7 @@ const MyBookings = () => {
   // Skeleton while query settles — avoids "No Bookings Found" flash on nav
   if (isBookingsLoading || (isFetching && hotels === undefined)) {
     return (
-      <div className="space-y-8">
+      <div className={theme.layout.section}>
         <div className="h-10 w-56 bg-gray-200 rounded-xl animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
@@ -207,10 +209,10 @@ const MyBookings = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className={theme.layout.section}>
       {/* Header Section */}{" "}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white">
-        <h1 className="text-lg md:text-2xl font-medium mb-2">
+        <h1 className={cn(theme.typography.h1, "text-white mb-2")}>
           My Bookings History
         </h1>
         <p className="text-blue-100 text-lg">
@@ -242,10 +244,10 @@ const MyBookings = () => {
         {hotels.map((hotel, hotelIndex) => (
           <div
             key={`${hotel._id}-${hotelIndex}`}
-            className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+            className={theme.card.interactive}
           >
             {/* Hotel Header */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+            <div className={cn(theme.card.header, "bg-gradient-to-r from-gray-50 to-gray-100")}>
               <div className="flex items-start gap-6">
                 <div className="relative">
                   <SafeImage
@@ -260,7 +262,7 @@ const MyBookings = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg md:text-2xl font-medium text-gray-700 mb-2">
+                  <h2 className={cn(theme.typography.h2, "mb-2")}>
                     {hotel.name}
                   </h2>
                   <div className="flex items-center gap-4 text-gray-600">
@@ -303,7 +305,7 @@ const MyBookings = () => {
                       className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-6 border border-slate-200 hover:shadow-xl transition-shadow duration-200"
                     >
                       {/* Status Header */}
-                      <div className="flex items-center justify-between mb-4">
+                      <div className={cn(theme.utils.flexBetween, "mb-4")}>
                         <div className="flex items-center gap-3">
                           <div
                             className={`p-2 rounded-xl ${getStatusColor(
@@ -313,10 +315,10 @@ const MyBookings = () => {
                             {getStatusIcon(booking.status || "pending")}
                           </div>
                           <div>
-                            <h3 className="font-medium text-gray-700">
+                            <h3 className={theme.typography.h3}>
                               Booking #{booking._id.slice(-8).toUpperCase()}
                             </h3>
-                            <p className="text-sm text-gray-500">
+                            <p className={theme.typography.muted}>
                               Booked on {createdAt.toLocaleDateString()}
                             </p>
                           </div>
@@ -353,10 +355,10 @@ const MyBookings = () => {
                       {/* Booking Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {/* Dates */}
-                        <div className="bg-white rounded-xl p-4 border border-gray-200">
+                        <div className={theme.card.base + " p-4"}>
                           <div className="flex items-center gap-2 mb-2">
                             <Calendar className="w-4 h-4 text-blue-600" />
-                            <span className="font-medium text-gray-700">
+                            <span className={theme.typography.label}>
                               Stay Dates
                             </span>
                           </div>
@@ -373,10 +375,10 @@ const MyBookings = () => {
                         </div>
 
                         {/* Guests */}
-                        <div className="bg-white rounded-xl p-4 border border-gray-200">
+                        <div className={theme.card.base + " p-4"}>
                           <div className="flex items-center gap-2 mb-2">
                             <Users className="w-4 h-4 text-green-600" />
-                            <span className="font-medium text-gray-700">
+                            <span className={theme.typography.label}>
                               Guests
                             </span>
                           </div>
@@ -397,10 +399,10 @@ const MyBookings = () => {
                         </div>
 
                         {/* Contact */}
-                        <div className="bg-white rounded-xl p-4 border border-gray-200">
+                        <div className={theme.card.base + " p-4"}>
                           <div className="flex items-center gap-2 mb-2">
                             <Phone className="w-4 h-4 text-purple-600" />
-                            <span className="font-medium text-gray-700">
+                            <span className={theme.typography.label}>
                               Contact
                             </span>
                           </div>
@@ -412,10 +414,10 @@ const MyBookings = () => {
 
                         {/* Pricing */}
                         {totalPrice > 0 && (
-                          <div className="bg-white rounded-xl p-4 border border-gray-200">
+                          <div className={theme.card.base + " p-4"}>
                             <div className="flex items-center gap-2 mb-2">
                               <CreditCard className="w-4 h-4 text-orange-600" />
-                              <span className="font-medium text-gray-700">
+                              <span className={theme.typography.label}>
                                 Pricing
                               </span>
                             </div>

@@ -17,7 +17,8 @@ import {
 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { SafeImage } from "./ui/safe-image";
-
+import { theme } from "../lib/theme";
+import { cn } from "../lib/utils";
 type Props = {
   hotel: HotelType;
 };
@@ -39,7 +40,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
   };
 
   return (
-    <div className="group bg-white rounded-2xl shadow-soft hover:shadow-large transition-all duration-300 border border-gray-100 overflow-hidden h-auto xl:h-[500px] flex">
+    <div className={cn(theme.card.interactive, "h-auto xl:h-[500px] flex")}>
       <div className="grid grid-cols-1 xl:grid-cols-[2fr_3fr] gap-0 w-full h-full">
         {/* Image Section */}
         <div className="relative overflow-hidden h-64 xl:h-[500px]">
@@ -52,23 +53,23 @@ const SearchResultsCard = ({ hotel }: Props) => {
 
           {/* Overlay Badges */}
           <div className="absolute top-4 left-4 flex flex-col space-y-2">
-            <div className="bg-primary-600 text-white rounded-full px-3 py-1">
-              <span className="text-sm font-medium">
+            <div className={theme.badges.primary}>
+              <span>
                 £{hotel.pricePerNight}
               </span>
             </div>
             {hotel.isFeatured && (
-              <div className="bg-yellow-500 text-white rounded-full px-3 py-1">
-                <span className="text-xs font-medium">Featured</span>
+              <div className={theme.badges.warning}>
+                <span>Featured</span>
               </div>
             )}
           </div>
 
           {/* Star Rating Badge */}
           <div className="absolute top-4 right-4">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
+            <div className={cn(theme.utils.glass, "rounded-full px-3 py-1 flex items-center space-x-1")}>
               <AiFillStar className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm font-medium text-gray-700">
+              <span className={theme.typography.label}>
                 {hotel.starRating}
               </span>
             </div>
@@ -109,7 +110,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
 
               <Link
                 to={`/detail/${hotel._id}`}
-                className="text-lg md:text-2xl font-medium text-gray-700 hover:text-primary-600 transition-colors cursor-pointer"
+                className={cn(theme.typography.h2, "hover:text-primary-600 transition-colors cursor-pointer")}
               >
                 {hotel.name}
               </Link>
@@ -123,7 +124,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
             </div>
 
             {/* Description */}
-            <div className="text-gray-600 leading-relaxed line-clamp-3">
+            <div className={cn(theme.typography.body, "leading-relaxed line-clamp-3")}>
               {hotel.description}
             </div>
 
@@ -148,7 +149,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
 
           {/* Facilities */}
           <div className="mt-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">
+            <h4 className={cn(theme.typography.label, "mb-3")}>
               Key Amenities
             </h4>
             <div className="flex flex-wrap gap-2">

@@ -12,6 +12,8 @@ import {
 import { SelectOptionLabel } from "./ui/select-option-label";
 import { Star } from "lucide-react";
 import useAppContext from "../hooks/useAppContext";
+import { theme } from "../lib/theme";
+import { cn } from "../lib/utils";
 
 type Props = {
   hotelId: string;
@@ -76,12 +78,12 @@ const WriteReviewForm = ({ hotelId, bookingId, onDone }: Props) => {
 
   return (
     <form
-      className="mt-3 space-y-3 rounded-xl border border-gray-200 bg-gray-50 p-4"
+      className={cn(theme.card.base, "mt-3 p-4 bg-gray-50")}
       onSubmit={handleReviewSubmit}
     >
       {/* shadcn Select — matches global control styling (no native <select>) */}
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-gray-700">Rating</label>
+      <div className={theme.form.field}>
+        <label className={theme.typography.label}>Rating</label>
         <Select
           value={String(rating)}
           onValueChange={(v) => setRating(Number(v))}
@@ -103,8 +105,8 @@ const WriteReviewForm = ({ hotelId, bookingId, onDone }: Props) => {
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-gray-700">
+      <div className={cn(theme.form.field, "mt-3")}>
+        <label className={theme.typography.label}>
           Comment
         </label>
         <Textarea
@@ -117,7 +119,7 @@ const WriteReviewForm = ({ hotelId, bookingId, onDone }: Props) => {
           className="bg-white"
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-3">
         <Button type="submit" disabled={isLoading || comment.trim().length < 3}>
           {isLoading ? "Submitting…" : "Submit review"}
         </Button>
